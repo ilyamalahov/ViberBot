@@ -20,70 +20,16 @@ namespace ViberBot.Repositories
             this.logger = provider.GetRequiredService<ILogger<UserRepository>>();
         }
 
-        public async Task<bool> Add(User user)
+        public async Task<User> Get(string userId)
         {
-            var sql = "INSERT INTO Users (Id) SET (@Id)";
+            var sql = "SELECT * FROM Users WHERE UserId = @userId";
 
             try
             {
                 using (var connection = new SqliteConnection(connectionString))
                 {
-                    var insertedRows = await connection.ExecuteAsync(sql, user);
-
-                    return insertedRows > 0;
-                }                
-            }
-            catch (SqliteException ex)
-            {
-                logger.LogError("Database error: {ex.Message}", ex.Message);
-
-                return false;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError("Error: {ex.Message}", ex.Message);
-
-                return false;
-            }
-        }
-
-        public async Task<bool> Delete(User user)
-        {
-            var sql = "DELETE FROM Users WHERE Id = @Id";
-
-            try
-            {
-                using (var connection = new SqliteConnection(connectionString))
-                {
-                    var deletedRows = await connection.ExecuteAsync(sql, user);
-
-                    return deletedRows > 0;
-                }   
-            }
-            catch (SqliteException ex)
-            {
-                logger.LogError("Database error: {ex.Message}", ex.Message);
-
-                return false;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError("Error: {ex.Message}", ex.Message);
-
-                return false;
-            }
-        }
-
-        public async Task<User> Get(string id)
-        {
-            var sql = "SELECT * FROM Users WHERE Id = @id";
-
-            try
-            {
-                using (var connection = new SqliteConnection(connectionString))
-                {
-                    return await connection.QuerySingleOrDefaultAsync<User>(sql, new { id });
-                } 
+                    return await connection.QuerySingleOrDefaultAsync<User>(sql, new { userId });
+                }
             }
             catch (SqliteException ex)
             {
@@ -108,7 +54,7 @@ namespace ViberBot.Repositories
                 using (var connection = new SqliteConnection(connectionString))
                 {
                     return await connection.QueryAsync<User>(sql);
-                } 
+                }
             }
             catch (SqliteException ex)
             {
@@ -121,6 +67,61 @@ namespace ViberBot.Repositories
                 logger.LogError("Error: {ex.Message}", ex.Message);
 
                 return null;
+            }
+        }
+
+        public async Task<bool> Add(User user)
+        {
+            // INJECT POCO Entity
+            var sql = "INSERT INTO Users (UserId) SET (@UserId)";
+
+            try
+            {
+                using (var connection = new SqliteConnection(connectionString))
+                {
+                    var insertedRows = await connection.ExecuteAsync(sql, user);
+
+                    return insertedRows > 0;
+                }
+            }
+            catch (SqliteException ex)
+            {
+                logger.LogError("Database error: {ex.Message}", ex.Message);
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError("Error: {ex.Message}", ex.Message);
+
+                return false;
+            }
+        }
+
+        public async Task<bool> Delete(string userId)
+        {
+            var sql = "DELETE FROM Users WHERE UserId = @userId";
+
+            try
+            {
+                using (var connection = new SqliteConnection(connectionString))
+                {
+                    var deletedRows = await connection.ExecuteAsync(sql, new { userId });
+
+                    return deletedRows > 0;
+                }
+            }
+            catch (SqliteException ex)
+            {
+                logger.LogError("Database error: {ex.Message}", ex.Message);
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError("Error: {ex.Message}", ex.Message);
+
+                return false;
             }
         }
     }

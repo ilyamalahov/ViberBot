@@ -34,7 +34,7 @@ namespace ViberBot
             services.AddSingleton<IViberBotClient>(provider => new ViberBotClient(viberBotOptions.AuthenticationToken));
             
             // Configure viber bot service
-            services.AddScoped<IViberBotService, ViberBotService>();
+            services.AddTransient<IViberBotService, ViberBotService>();
 
             // Configure SQLite database
             var connectionString = Configuration.GetConnectionString("SqliteConnection");
@@ -54,7 +54,7 @@ namespace ViberBot
                 // app.UseHsts();
             }
 
-            // app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseViberWebhook();
         }

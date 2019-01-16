@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using Viber.Bot;
 using ViberBot.Options;
 using ViberBot.Repositories;
+using ViberBot.Services;
 
 namespace ViberBot.Middlewares
 {
@@ -17,23 +18,21 @@ namespace ViberBot.Middlewares
         private readonly IViberBotClient viberBotClient;
         private readonly ILogger<ViberWebhookMiddleware> logger;
         private readonly ViberBotOptions viberOptions;
-        private readonly IUserRepository userRepository;
 
         public ViberWebhookMiddleware(
             RequestDelegate next,
             IViberBotClient viberBotClient,
             ILogger<ViberWebhookMiddleware> logger,
-            IOptions<ViberBotOptions> viberConfigOptions,
-            IUserRepository userRepository)
+            IOptions<ViberBotOptions> viberConfigOptions)
         {
             this.next = next;
             this.viberBotClient = viberBotClient;
             this.logger = logger;
             this.viberOptions = viberConfigOptions.Value;
-            this.userRepository = userRepository;
+
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext context, IViberBotService viberBotService)
         {
             try
             {
@@ -48,6 +47,8 @@ namespace ViberBot.Middlewares
 
                 if (!isEndpointValid)
                 {
+                    logger.LogError("Webhook endpoint is not valid");
+                    
                     await next.Invoke(context);
 
                     return;
@@ -73,26 +74,25 @@ namespace ViberBot.Middlewares
                 // Deserialize JSON callback data
                 var callbackData = JsonConvert.DeserializeObject<CallbackData>(body);
 
-                // Get account info
-                var accountInfo = await viberBotClient.GetAccountInfoAsync();
-
-                logger.LogDebug("Event type: {callbackData.Event}", callbackData.Event);
-
                 switch (callbackData.Event)
                 {
                     case EventType.Subscribed:
-                        await OnSubscribed(callbackData);
+                        await viberBotService.Subscribed(callbackData.User);
+                        break;
+                    case EventType.Unsubscribed:
+                        await viberBotService.UnSubscribed(callbackData.UserId);
                         break;
                     case EventType.ConversationStarted:
-                        await OnConversationStarted(callbackData);
+                        await viberBotService.ConversationStarted(callbackData.User);
                         break;
                     case EventType.Webhook:
-                        logger.LogInformation("Webhook callback");
+                        await viberBotService.Webhook();
                         break;
                     case EventType.Message:
-                        await OnMessage(callbackData);
+                        await viberBotService.ReceiveMessage(callbackData.Sender, callbackData.Message);
                         break;
                     default:
+                        logger.LogDebug("Event type: {callbackData.Event}", callbackData.Event);
                         break;
                 }
             }
@@ -102,100 +102,6 @@ namespace ViberBot.Middlewares
 
                 throw;
             }
-        }
-
-        /// <summary>
-        /// Вызывается при принятии сообщения от пользователя
-        /// </summary>
-        /// <param name="callbackData">Данные из запроса от Viber REST API</param>
-        /// <returns></returns>
-        private async Task OnMessage(CallbackData callbackData)
-        {
-            logger.LogInformation("Receive message from user");
-
-            var message = callbackData.Message;
-
-            switch (message.Type)
-            {
-                case MessageType.File:
-                    var fileMessage = (FileMessage)message;
-                    break;
-                case MessageType.Text:
-                    await SendTextMessage(callbackData.Sender, (TextMessage)message);
-                    break;
-                case MessageType.Picture:
-                    // Send welcome message to user
-                    logger.LogInformation("Send picture reply to user");
-                    message.Receiver = callbackData.Sender.Id;
-
-                    await viberBotClient.SendPictureMessageAsync((PictureMessage)message);
-                    break;
-            }
-        }
-
-        private async Task SendTextMessage(User sender, TextMessage message)
-        {
-            // Welcome message
-            var welcomeMessage = new TextMessage
-            {
-                Text = "Hey! You send me a message!",
-                Receiver = sender.Id
-            };
-
-            message.Receiver = sender.Id;
-
-            // Send welcome message to user
-            logger.LogInformation("Send text reply to user");
-
-            await viberBotClient.SendTextMessageAsync(message);
-        }
-
-        /// <summary>
-        /// Вызывается ...
-        /// </summary>
-        /// <param name="callbackData"></param>
-        /// <returns></returns>
-        private async Task OnConversationStarted(CallbackData callbackData)
-        {
-            // Conversation started
-            logger.LogInformation("Conversation started");
-
-            // Welcome message
-            var welcomeMessage = new TextMessage
-            {
-                Text = "Welcome!",
-                Receiver = callbackData.User.Id
-            };
-
-            // Send welcome message to user
-            logger.LogInformation("Send welcome message to user");
-
-            await viberBotClient.SendTextMessageAsync(welcomeMessage);
-        }
-
-        private async Task OnSubscribed(CallbackData callbackData)
-        {
-            // User subscribe to channel
-            logger.LogInformation("User subscribe to channel");
-
-            var insertResult = await userRepository.Add(callbackData.Sender);
-
-            if (!insertResult)
-            {
-                throw new Exception("Database insert error");
-            }
-
-            // Subscribe message
-            var subscribeMessage = new TextMessage
-            {
-                Text = "Thanks for subscribe!",
-                Receiver = callbackData.User.Id
-            };
-
-            // Send thanks message to subscribed user
-            logger.LogInformation("Send thanks message to subscribed user");
-
-            await viberBotClient.SendTextMessageAsync(subscribeMessage);
         }
     }
 }
