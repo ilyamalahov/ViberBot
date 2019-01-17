@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Viber.Bot;
+using ViberBot.Entities;
 
 namespace ViberBot.Repositories
 {
