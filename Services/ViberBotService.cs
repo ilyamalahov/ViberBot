@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Viber.Bot;
+using ViberBot.Enums;
 using ViberBot.Repositories;
 
 namespace ViberBot.Services
@@ -57,7 +58,7 @@ namespace ViberBot.Services
                     break;
                 default:
                     logger.LogError("The messages for this type \"{message.Type}\" is not processed", message.Type);
-                    break;                
+                    break;
             }
         }
 
@@ -71,17 +72,67 @@ namespace ViberBot.Services
             // Conversation started
             logger.LogInformation("User \"{sender.Id}\" started conversation", user.Id);
 
-            // Welcome message
-            var welcomeMessage = new TextMessage
+            // Send keyboard to user
+            logger.LogInformation("Send keyboard to user");
+
+            var keyboardMessage = new KeyboardMessage
             {
-                Text = "Welcome!",
-                Receiver = user.Id
+                Receiver = user.Id,
+                Text = "Выберите нужный элемент из меню",
+                Keyboard = new Keyboard
+                {
+                    Buttons = new[]
+                    {
+                        new KeyboardButton
+                        {
+                            Columns = 2,
+                            Rows = 1,
+                            Text = "<b><font color='#fff'>Отправить локацию</font></b>",
+                            TextHorizontalAlign = TextHorizontalAlign.Center,
+                            TextVerticalAlign = TextVerticalAlign.Middle,
+                            ActionType = KeyboardActionType.Reply,
+                            ActionBody = KeyboardReply.SendLocationBefore.ToString(),
+                            BackgroundColor = "#b20000"
+                        },
+                        new KeyboardButton
+                        {
+                            Columns = 2,
+                            Rows = 1,
+                            Text = "<b><font color='#fff'>Прикрепить изображение</font></b>",
+                            TextHorizontalAlign = TextHorizontalAlign.Center,
+                            TextVerticalAlign = TextVerticalAlign.Middle,
+                            ActionType = KeyboardActionType.Reply,
+                            ActionBody = KeyboardReply.AttachPicture.ToString(),
+                            BackgroundColor = "#0053b2"
+                        },
+                        new KeyboardButton
+                        {
+                            Columns = 2,
+                            Rows = 1,
+                            Text = "<b><font color='#fff'>Отправить сообщение</font></b>",
+                            TextHorizontalAlign = TextHorizontalAlign.Center,
+                            TextVerticalAlign = TextVerticalAlign.Middle,
+                            ActionType = KeyboardActionType.Reply,
+                            ActionBody = KeyboardReply.SendMessage.ToString(),
+                            BackgroundColor = "#00c621"
+                        },
+                        new KeyboardButton
+                        {
+                            Columns = 2,
+                            Rows = 1,
+                            Text = "<b><font color='#fff'>Другое действие</font></b>",
+                            TextHorizontalAlign = TextHorizontalAlign.Center,
+                            TextVerticalAlign = TextVerticalAlign.Middle,
+                            ActionType = KeyboardActionType.Reply,
+                            ActionBody = KeyboardReply.OtherAction.ToString(),
+                            BackgroundColor = "#d3db00"
+                        }
+                    }
+                }
             };
 
-            // Send welcome message to user
-            logger.LogInformation("Send welcome reply to user");
-
-            await viberBotClient.SendTextMessageAsync(welcomeMessage);
+            // Process keyboard message send
+            await viberBotClient.SendKeyboardMessageAsync(keyboardMessage);
         }
 
         /// <summary>
@@ -128,9 +179,12 @@ namespace ViberBot.Services
             logger.LogInformation("User \"{userId}\" unsubscribed from channel", userId);
 
             // Delete a user directory
-            var userFolder = Path.Combine("assets", userId);
+            var userFolder = Path.Combine("assets", "users", userId);
 
-            Directory.Delete(userFolder, true);
+            if(Directory.Exists(userFolder))
+            {
+                Directory.Delete(userFolder, true);
+            }
 
             // var deleteResult = await userRepository.Delete(userId);
             var deleteResult = true;
@@ -159,17 +213,45 @@ namespace ViberBot.Services
         /// <returns>Асинхронная задача</returns>
         private async Task HandleTextMessage(User user, TextMessage message)
         {
-            // Welcome message
-            var replyMessage = new TextMessage
+            var keyboardReply = Enum.Parse<KeyboardReply>(message.Text);
+            
+            var isKeyboardReplyDefined = Enum.IsDefined(typeof(KeyboardReply), keyboardReply);
+
+            if (isKeyboardReplyDefined)
             {
-                Text = $"Вы отправили мне сообщение!\n\nВаш ответ: \"{message.Text}\"",
-                Receiver = user.Id
-            };
+                switch (keyboardReply)
+                {
+                    case KeyboardReply.SendLocationBefore:
+                        logger.LogInformation("Button action: Send location before");
+                        break;
+                    case KeyboardReply.AttachPicture:
+                        logger.LogInformation("Button action: Attach picture");
+                        break;
+                    case KeyboardReply.SendLocationAfter:
+                        logger.LogInformation("Button action: Send location after");
+                        break;
+                    case KeyboardReply.SendMessage:
+                        logger.LogInformation("Button action: Send message");
+                        break;
+                    case KeyboardReply.OtherAction:
+                        logger.LogInformation("Button action: Other action");
+                        break;
+                }
+            }
+            else
+            {
+                // Reply message
+                var replyMessage = new TextMessage
+                {
+                    Text = $"Вы отправили мне сообщение!\n\nВаш ответ: \"{message.Text}\"",
+                    Receiver = user.Id
+                };
 
-            // Send welcome message to user
-            logger.LogInformation("Send text reply to user", user.Id);
+                // Send welcome message to user
+                logger.LogInformation("Send text reply to user", user.Id);
 
-            await viberBotClient.SendTextMessageAsync(replyMessage);
+                await viberBotClient.SendTextMessageAsync(replyMessage);
+            }
         }
 
         /// <summary>
@@ -190,7 +272,7 @@ namespace ViberBot.Services
 
             var replyMessage = new TextMessage
             {
-                Text = "Я получил изображение, спасибо!",
+                Text = "Я получил Ваше изображение, спасибо!",
                 Receiver = user.Id
             };
 
@@ -216,7 +298,7 @@ namespace ViberBot.Services
 
             var replyMessage = new TextMessage
             {
-                Text = "Я получил файл, спасибо!",
+                Text = "Я получил Ваш файл, спасибо!",
                 Receiver = user.Id
             };
 
@@ -239,8 +321,6 @@ namespace ViberBot.Services
             throw new NotImplementedException();
         }
 
-
-
         /// <summary>
         /// Загружает файл/изображение из Viber на сервер
         /// </summary>
@@ -253,7 +333,7 @@ namespace ViberBot.Services
             // Create a user directory if it does not exists
             logger.LogInformation("Create a user directory if it does not exists");
 
-            var userFolder = Path.Combine("assets", userId);
+            var userFolder = Path.Combine("assets", "users", userId);
 
             Directory.CreateDirectory(userFolder);
 
@@ -268,7 +348,7 @@ namespace ViberBot.Services
             }
 
             // Download file
-            logger.LogError("Process file download");
+            logger.LogInformation("Process file download");
 
             using (var client = new WebClient())
             {

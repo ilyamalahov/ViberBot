@@ -56,6 +56,8 @@ namespace ViberBot
 
             //app.UseHttpsRedirection();
 
+            app.UseStaticFiles();
+
             app.UseViberWebhook();
         }
     }
