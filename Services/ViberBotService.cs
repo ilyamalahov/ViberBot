@@ -87,45 +87,26 @@ namespace ViberBot.Services
                         {
                             Columns = 2,
                             Rows = 1,
-                            Text = "<b><font color='#fff'>Отправить локацию</font></b>",
-                            TextHorizontalAlign = TextHorizontalAlign.Center,
-                            TextVerticalAlign = TextVerticalAlign.Middle,
+                            Text = "КП рядом",
                             ActionType = KeyboardActionType.Reply,
-                            ActionBody = KeyboardReply.SendLocationBefore.ToString(),
-                            BackgroundColor = "#b20000"
+                            ActionBody = StartDriverKeyboardReply.ControlPointNear.ToString()
                         },
                         new KeyboardButton
                         {
                             Columns = 2,
                             Rows = 1,
-                            Text = "<b><font color='#fff'>Прикрепить изображение</font></b>",
-                            TextHorizontalAlign = TextHorizontalAlign.Center,
-                            TextVerticalAlign = TextVerticalAlign.Middle,
+                            Text = "Поиск КП по имени",
                             ActionType = KeyboardActionType.Reply,
-                            ActionBody = KeyboardReply.AttachPicture.ToString(),
-                            BackgroundColor = "#0053b2"
+                            ActionBody = StartDriverKeyboardReply.ControlPointSearch.ToString()
                         },
                         new KeyboardButton
                         {
                             Columns = 2,
                             Rows = 1,
-                            Text = "<b><font color='#fff'>Отправить сообщение</font></b>",
-                            TextHorizontalAlign = TextHorizontalAlign.Center,
-                            TextVerticalAlign = TextVerticalAlign.Middle,
+                            Text = "<b>В начало</b>",
                             ActionType = KeyboardActionType.Reply,
-                            ActionBody = KeyboardReply.SendMessage.ToString(),
-                            BackgroundColor = "#00c621"
-                        },
-                        new KeyboardButton
-                        {
-                            Columns = 2,
-                            Rows = 1,
-                            Text = "<b><font color='#fff'>Другое действие</font></b>",
-                            TextHorizontalAlign = TextHorizontalAlign.Center,
-                            TextVerticalAlign = TextVerticalAlign.Middle,
-                            ActionType = KeyboardActionType.Reply,
-                            ActionBody = KeyboardReply.OtherAction.ToString(),
-                            BackgroundColor = "#d3db00"
+                            ActionBody = StartDriverKeyboardReply.ToBegining.ToString(),
+                            BackgroundColor = "#f4e542"
                         }
                     }
                 }
@@ -213,30 +194,13 @@ namespace ViberBot.Services
         /// <returns>Асинхронная задача</returns>
         private async Task HandleTextMessage(User user, TextMessage message)
         {
-            var keyboardReply = Enum.Parse<KeyboardReply>(message.Text);
+            var keyboardReply = Enum.Parse<StartDriverKeyboardReply>(message.Text);
             
-            var isKeyboardReplyDefined = Enum.IsDefined(typeof(KeyboardReply), keyboardReply);
+            var isKeyboardReplyDefined = Enum.IsDefined(typeof(StartDriverKeyboardReply), keyboardReply);
 
             if (isKeyboardReplyDefined)
             {
-                switch (keyboardReply)
-                {
-                    case KeyboardReply.SendLocationBefore:
-                        logger.LogInformation("Button action: Send location before");
-                        break;
-                    case KeyboardReply.AttachPicture:
-                        logger.LogInformation("Button action: Attach picture");
-                        break;
-                    case KeyboardReply.SendLocationAfter:
-                        logger.LogInformation("Button action: Send location after");
-                        break;
-                    case KeyboardReply.SendMessage:
-                        logger.LogInformation("Button action: Send message");
-                        break;
-                    case KeyboardReply.OtherAction:
-                        logger.LogInformation("Button action: Other action");
-                        break;
-                }
+                logger.LogDebug("Driver selected value: {keyboardReply}", keyboardReply);
             }
             else
             {
