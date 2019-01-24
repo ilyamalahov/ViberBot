@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Viber.Bot;
-using ViberBot.Extensions;
 using ViberBot.Options;
 using ViberBot.Repositories;
 using ViberBot.Services;
@@ -34,12 +33,20 @@ namespace ViberBot
             services.AddSingleton<IViberBotClient>(provider => new ViberBotClient(viberBotOptions.AuthenticationToken));
             
             // Configure viber bot service
-            services.AddTransient<IViberBotService, ViberBotService>();
+            services.AddSingleton<IBotService, ViberBotService>();
+            
+            // 
+            services.AddSingleton<ISendMessageService, SendMessageService>();
+
+            services.AddSingleton<IUserStateMachineService, InMemoryUserStateMachineService>();
 
             // Configure SQLite database
-            var connectionString = Configuration.GetConnectionString("SqliteConnection");
+            // var connectionString = Configuration.GetConnectionString("SqliteConnection");
 
-            services.AddScoped<IUserRepository>(provider => new UserRepository(connectionString, provider));
+            // services.AddScoped<IUserRepository>(provider => new UserRepository(connectionString, provider));
+
+            //
+            services.AddMvcCore();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -58,7 +65,8 @@ namespace ViberBot
 
             app.UseStaticFiles();
 
-            app.UseViberWebhook();
+            // app.UseViberWebhook();
+            app.UseMvcWithDefaultRoute();
         }
     }
 }
