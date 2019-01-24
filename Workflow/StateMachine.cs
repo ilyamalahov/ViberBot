@@ -4,20 +4,28 @@ using ViberBot.Services;
 
 namespace ViberBot.Workflow
 {
-    public class StateMachine
+    public enum State
+    {
+        ContainerPlacesFound,
+        ProblemRegistered,
+        AfterProblemRegistered,
+        BeforeProblemRegistered,
+        ProblemContentSended,
+        ProblemStarted,
+        Started
+    }
+
+    public class StateProcess
     {
         private ISendMessageService sendMessageService;
 
-        public StateMachine(ISendMessageService sendMessageService)
+        public StateProcess(ISendMessageService sendMessageService)
         {
             this.sendMessageService = sendMessageService;
         }
 
-        public State CurrentState { get; private set; }
-
         public void SetState(State value)
         {
-            CurrentState = value;
         }
 
         public async Task ProcessFlow(string userId, string messageText)

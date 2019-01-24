@@ -10,18 +10,18 @@ using ViberBot.Repositories;
 
 namespace ViberBot.Services
 {
-    public class ViberBotService : IBotService
+    public class ViberRequestService : IRequestService
     {
         private readonly IViberBotClient viberBotClient;
         private readonly ISendMessageService sendMessageService;
         private readonly IUserStateMachineService userStateMachineService;
-        private readonly ILogger<ViberBotService> logger;
+        private readonly ILogger<ViberRequestService> logger;
 
-        public ViberBotService(
+        public ViberRequestService(
             IViberBotClient viberBotClient,
             ISendMessageService sendMessageService,
             IUserStateMachineService userStateMachineService,
-            ILogger<ViberBotService> logger
+            ILogger<ViberRequestService> logger
             )
         {
             this.viberBotClient = viberBotClient;

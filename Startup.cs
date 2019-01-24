@@ -33,17 +33,12 @@ namespace ViberBot
             services.AddSingleton<IViberBotClient>(provider => new ViberBotClient(viberBotOptions.AuthenticationToken));
             
             // Configure viber bot service
-            services.AddSingleton<IBotService, ViberBotService>();
+            services.AddSingleton<IRequestService, ViberRequestService>();
             
             // 
             services.AddSingleton<ISendMessageService, SendMessageService>();
 
             services.AddSingleton<IUserStateMachineService, InMemoryUserStateMachineService>();
-
-            // Configure SQLite database
-            // var connectionString = Configuration.GetConnectionString("SqliteConnection");
-
-            // services.AddScoped<IUserRepository>(provider => new UserRepository(connectionString, provider));
 
             //
             services.AddMvcCore();

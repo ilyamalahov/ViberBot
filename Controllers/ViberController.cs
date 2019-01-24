@@ -7,9 +7,9 @@ namespace ViberBot.Controllers
     public class ViberController : ControllerBase
     {
         [HttpPost]
-        public async void Index([FromServices] IBotService viberBotService)
+        public async void Index([FromServices] IRequestService requestService)
         {
-            await viberBotService.HandleRequest(HttpContext);
+            await requestService.HandleRequest(HttpContext);
         }
     }
 }

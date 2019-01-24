@@ -1,28 +1,22 @@
 using System;
 using System.Threading.Tasks;
+using ViberBot.Workflow.States;
 
 namespace ViberBot.Workflow
-{ 
-    public interface IState
+{     
+    public interface IProcess
     {
-        void Start();
-
-        //
+        Task Start(string receiverId);
         void SearchContainerPlacesNerby();
         void SendContainerPlaceName();
-
-        //
         void SearchContainerPlacesByName();
-
-        // 
         void RegisterProblem();
         void RegisterBeforeProblem();
         void RegisterAfterProblem();
         void SendProblemContent();
+        Task ProcessFlow(string receiverId, string messageText);
     }
-    
-
-    public class Process
+    public class Process: IProcess
     {
         private readonly StartedState startedState;
         private readonly ContainerPlacesFound containerPlacesFound;
@@ -34,11 +28,10 @@ namespace ViberBot.Workflow
             this.startedState = new StartedState(this);
             this.containerPlacesFound = new ContainerPlacesFound(this);
 
-
             CurrentState = startedState;
         }
 
-        public void Start() => CurrentState.Start();
+        public async Task Start(string receiverId) => await CurrentState.Start(receiverId);
 
         public void SearchContainerPlacesNerby() => CurrentState.SearchContainerPlacesNerby();
 
@@ -53,103 +46,8 @@ namespace ViberBot.Workflow
         public void RegisterAfterProblem() => CurrentState.RegisterAfterProblem();
 
         public void SendProblemContent() => CurrentState.SendProblemContent();
-    }
 
-    internal class ContainerPlacesFound : IState
-    {
-        private Process process;
-
-        public ContainerPlacesFound(Process process)
-        {
-            this.process = process;
-        }
-
-        public void RegisterAfterProblem()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RegisterBeforeProblem()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RegisterProblem()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SearchContainerPlacesByName()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SearchContainerPlacesNerby()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SendContainerPlaceName()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SendProblemContent()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Start()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class StartedState : IState
-    {
-        private Process process;
-
-        public StartedState(Process process)
-        {
-            this.process = process;
-        }
-
-        public void Start()
-        {
-            process.CurrentState = new StartedState(process);
-        }
-
-        public void RegisterAfterProblem()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RegisterBeforeProblem()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RegisterProblem()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SearchContainerPlacesByName()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SearchContainerPlacesNerby()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SendContainerPlaceName()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SendProblemContent()
+        public Task ProcessFlow(string receiverId, string messageText)
         {
             throw new NotImplementedException();
         }

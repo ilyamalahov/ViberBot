@@ -8,43 +8,44 @@ namespace ViberBot.Services
     public class InMemoryUserStateMachineService : IUserStateMachineService
     {
         private readonly ISendMessageService sendMessageService;
-        private readonly ConcurrentDictionary<string, StateMachine> stateMachines;
+        private readonly ConcurrentDictionary<string, IProcess> stateProcesses;
 
         public InMemoryUserStateMachineService(ISendMessageService sendMessageService)
         {
             this.sendMessageService = sendMessageService;
 
-            stateMachines = new ConcurrentDictionary<string, StateMachine>();
+            stateProcesses = new ConcurrentDictionary<string, IProcess>();
         }
 
-        public StateMachine Add(string userId)
+        public IProcess Add(string userId)
         {
             if(userId == null) throw new ArgumentNullException(nameof(userId));
 
-            if(stateMachines.TryGetValue(userId, out var stateMachine)) throw new Exception("State machine for userId already exists");
+            //if(stateProcesses.TryGetValue(userId, out var stateMachine))
+            // {
+            //   throw new Exception("State machine for userId already exists");  
+            // } 
 
-            return stateMachines.GetOrAdd(userId, new StateMachine(sendMessageService));
+            return stateProcesses.GetOrAdd(userId, new Process());
         }
 
         public void Delete(string userId)
         {
             if(userId == null) throw new ArgumentNullException(nameof(userId));
             
-            if(!stateMachines.TryGetValue(userId, out var stateMachine))
+            if(!stateProcesses.TryRemove(userId, out var stateMachine))
             {
-                throw new Exception("State machine for userId already exists");
+                throw new Exception($"Delete state machine for user \"{userId}\" failed");
             }
-
-            stateMachines.TryRemove(userId, out var removedStateMachine);
         }
 
-        public StateMachine Get(string userId)
+        public IProcess Get(string userId)
         {
             if(userId == null) throw new ArgumentNullException(nameof(userId));
             
-            if(!stateMachines.TryGetValue(userId, out var stateMachine))
+            if(!stateProcesses.TryGetValue(userId, out var stateMachine))
             {
-                throw new Exception("State machine for userId already exists");
+                throw new Exception($"State machine for user \"{userId}\" not exists");
             }
 
             return stateMachine;
@@ -53,8 +54,8 @@ namespace ViberBot.Services
 
     public interface IUserStateMachineService
     {
-        StateMachine Add(string userId);
-        StateMachine Get(string userId);
+        IProcess Add(string userId);
+        IProcess Get(string userId);
         void Delete(string userId);
     }
 }

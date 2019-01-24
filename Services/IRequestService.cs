@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace ViberBot.Services
 {
-    public interface IBotService
+    public interface IRequestService
     {
         Task HandleRequest(HttpContext context);
     }
