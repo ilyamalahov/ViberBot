@@ -3,53 +3,17 @@ using System.Threading.Tasks;
 
 namespace ViberBot.Workflow.States
 {
-    public class StartedState : IState
+    public class StartedState : State
     {
-        private Process process;
-
-        public StartedState(Process process)
+        public override async Task Start(string receiverId)
         {
-            this.process = process;
-        }
+            // Check if driver
 
-        public void RegisterAfterProblem()
-        {
-            throw new NotImplementedException();
-        }
+            // If User - Another action
 
-        public void RegisterBeforeProblem()
-        {
-            throw new NotImplementedException();
-        }
+            // If Driver - Send Driver Started Menu
 
-        public void RegisterProblem()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SearchContainerPlacesByName()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SearchContainerPlacesNerby()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SendContainerPlaceName()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SendProblemContent()
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task Start(string receiverId)
-        {
-            throw new NotImplementedException();
+            context.SetState(new DriverState());
         }
     }
 }

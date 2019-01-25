@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Viber.Bot;
 using ViberBot.Options;
-using ViberBot.Repositories;
 using ViberBot.Services;
 
 namespace ViberBot

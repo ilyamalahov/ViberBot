@@ -2,22 +2,23 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using ViberBot.Workflow;
+using ViberBot.Workflow.States;
 
 namespace ViberBot.Services
 {
     public class InMemoryUserStateMachineService : IUserStateMachineService
     {
         private readonly ISendMessageService sendMessageService;
-        private readonly ConcurrentDictionary<string, IProcess> stateProcesses;
+        private readonly ConcurrentDictionary<string, IContext> stateProcesses;
 
         public InMemoryUserStateMachineService(ISendMessageService sendMessageService)
         {
             this.sendMessageService = sendMessageService;
 
-            stateProcesses = new ConcurrentDictionary<string, IProcess>();
+            stateProcesses = new ConcurrentDictionary<string, IContext>();
         }
 
-        public IProcess Add(string userId)
+        public IContext Add(string userId)
         {
             if(userId == null) throw new ArgumentNullException(nameof(userId));
 
@@ -26,7 +27,7 @@ namespace ViberBot.Services
             //   throw new Exception("State machine for userId already exists");  
             // } 
 
-            return stateProcesses.GetOrAdd(userId, new Process());
+            return stateProcesses.GetOrAdd(userId, new Context(new StartedState()));
         }
 
         public void Delete(string userId)
@@ -39,7 +40,7 @@ namespace ViberBot.Services
             }
         }
 
-        public IProcess Get(string userId)
+        public IContext Get(string userId)
         {
             if(userId == null) throw new ArgumentNullException(nameof(userId));
             
@@ -50,12 +51,5 @@ namespace ViberBot.Services
 
             return stateMachine;
         }
-    }
-
-    public interface IUserStateMachineService
-    {
-        IProcess Add(string userId);
-        IProcess Get(string userId);
-        void Delete(string userId);
     }
 }

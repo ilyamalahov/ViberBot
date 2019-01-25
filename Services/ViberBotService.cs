@@ -6,26 +6,22 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Viber.Bot;
-using ViberBot.Repositories;
 
 namespace ViberBot.Services
 {
     public class ViberRequestService : IRequestService
     {
         private readonly IViberBotClient viberBotClient;
-        private readonly ISendMessageService sendMessageService;
         private readonly IUserStateMachineService userStateMachineService;
         private readonly ILogger<ViberRequestService> logger;
 
         public ViberRequestService(
             IViberBotClient viberBotClient,
-            ISendMessageService sendMessageService,
             IUserStateMachineService userStateMachineService,
             ILogger<ViberRequestService> logger
             )
         {
             this.viberBotClient = viberBotClient;
-            this.sendMessageService = sendMessageService;
             this.userStateMachineService = userStateMachineService;
             this.logger = logger;
         }
@@ -34,9 +30,9 @@ namespace ViberBot.Services
         {
             logger.LogInformation("Receive message from user \"{sender.Id}\"", sender.Id);
 
-            var stateMachine = userStateMachineService.Get(sender.Id);
+            var stateContext = userStateMachineService.Get(sender.Id);
 
-            await stateMachine.ProcessFlow(sender.Id, (message as TextMessage).Text);
+            await stateContext.ProcessFlow(sender.Id, (message as TextMessage).Text);
         }
 
         public async Task ConversationStarted(string userId)
@@ -47,10 +43,10 @@ namespace ViberBot.Services
                 logger.LogInformation("User \"{sender.Id}\" started conversation", userId);
 
                 // 
-                var stateMachine = userStateMachineService.Add(userId);
+                // var stateContext = userStateMachineService.Add(userId);
 
                 // 
-                await stateMachine.Start(userId);
+                // await stateContext.Trigger(Workflow.Command.Start);
             }
             catch (Exception ex)
             {
@@ -136,7 +132,7 @@ namespace ViberBot.Services
             // Validate viber signature
             logger.LogInformation("Validate viber content signature");
 
-            var body = new StreamReader(context.Request.Body).ReadToEnd();
+            var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
 
             var signatureHeader = context.Request.Headers[ViberBotClient.XViberContentSignatureHeader];
 

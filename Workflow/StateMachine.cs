@@ -1,138 +1,96 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using ViberBot.Services;
 
-namespace ViberBot.Workflow
+namespace ViberBot.Workflow.StateMachine
 {
     public enum State
     {
-        ContainerPlacesFound,
-        ProblemRegistered,
-        AfterProblemRegistered,
-        BeforeProblemRegistered,
-        ProblemContentSended,
-        ProblemStarted,
-        Started
+        Inactive,
+        Active,
+        Paused,
+        Terminated
     }
 
-    public class StateProcess
+    public enum Command
     {
-        private ISendMessageService sendMessageService;
+        Begin,
+        End,
+        Pause,
+        Resume,
+        Exit
+    }
 
-        public StateProcess(ISendMessageService sendMessageService)
+
+    public class Transition
+    {
+        readonly private State currentState;
+        readonly private Command command;
+
+        public Transition(State currentState, Command command)
         {
-            this.sendMessageService = sendMessageService;
+            this.currentState = currentState;
+            this.command = command;
         }
 
-        public void SetState(State value)
+        public override int GetHashCode()
+        {
+            return 17 + 31 * currentState.GetHashCode() + 31 * command.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as Transition;
+
+            return other != null && this.currentState == other.currentState && this.command == other.command;
+        }
+    }
+
+    public class Context
+    {
+        private Dictionary<Transition, State> transitions;
+        public State CurrentState { get; private set; }
+
+        public Context()
+        {
+            CurrentState = State.Inactive;
+
+            transitions = new Dictionary<Transition, State>
+            {
+                { new Transition(State.Inactive, Command.Exit), State.Terminated },
+                { new Transition(State.Inactive, Command.Begin), State.Active },
+                { new Transition(State.Active, Command.End), State.Inactive },
+                { new Transition(State.Active, Command.Pause), State.Paused },
+                { new Transition(State.Paused, Command.End), State.Inactive },
+                { new Transition(State.Paused, Command.Resume), State.Active }
+            };
+        }
+
+        private void Start(string arg1, string arg2)
         {
         }
 
-        public async Task ProcessFlow(string userId, string messageText)
+        public State GetNext(Command command)
         {
-            if (messageText == "ToStart")
-            {
-                await Start(userId);
+            var currentTransition = new Transition(CurrentState, command);
 
-                return;
+            if (!transitions.TryGetValue(currentTransition, out var nextState))
+            {
+                throw new Exception("Invalid transition: " + CurrentState + " -> " + command);
             }
 
-            if (messageText == "SearchContainerPlacesNearby")
-            {
-                var places = new string[] { "Площадка 1", "Площадка 2", "Площадка 3" };
-
-                await sendMessageService.SendContainerPlacesMenuAsync(userId, places);
-
-                SetState(State.ContainerPlacesFound);
-
-                return;
-            }
-
-            // Регистрация проблемы / до проблемы / после проблемы
-            if (messageText == "RegisterProblem")
-            {
-                // 
-
-                SetState(State.ProblemRegistered);
-
-                return;
-            }
-            if (messageText == "RegisterBeforeProblem")
-            {
-                // 
-
-                SetState(State.AfterProblemRegistered);
-
-                return;
-            }
-            if (messageText == "RegisterAfterProblem")
-            {
-                // 
-
-                SetState(State.BeforeProblemRegistered);
-
-                return;
-            }
-            if (messageText == "SendProblemContent")
-            {
-                // 
-
-                SetState(State.ProblemContentSended);
-
-                return;
-            }
-
-            // Поиск контейнерной площадки (КП) по имени
-            if (messageText == "SearchContainerPlacesByName")
-            {
-                // 
-
-                SetState(State.ContainerPlacesFound);
-
-                return;
-            }
-
-            if (messageText == "SendContainerPlaceName")
-            {
-                // 
-                var places = new string[] { "", "", "" };
-
-                await sendMessageService.SendContainerPlacesMenuAsync(userId, places);
-
-                // 
-                SetState(State.ProblemContentSended);
-
-                return;
-            }
-
-            // РЕГУЛЯРНЫЕ ВЫРАЖЕНИЯ ???
-            if (messageText == "SelectedPlace")
-            {
-                // 
-                await sendMessageService.SendProblemMenuAsync(userId);
-
-                SetState(State.ProblemStarted);
-
-                return;
-            }
-
-
-            // РЕГУЛЯРНЫЕ ВЫРАЖЕНИЯ ???
-            if (messageText == "КОНКРЕТНАЯ КП")
-            {
-                // 
-
-                SetState(State.ProblemStarted);
-
-                return;
-            }
+            return nextState;
         }
 
-        public async Task Start(string receiverId)
+        public void Trigger(Command command)
         {
-            await sendMessageService.SendStartedMenuAsync(receiverId);
+            var currentTransition = new Transition(CurrentState, command);
 
-            SetState(State.Started);
+            if (!transitions.TryGetValue(currentTransition, out var nextState))
+            {
+                throw new Exception("Invalid transition: " + CurrentState + " -> " + command);
+            }
         }
     }
 }
