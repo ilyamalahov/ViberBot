@@ -13,7 +13,7 @@ namespace ViberBot.Workflow.States
 
             // If Driver - Send Driver Started Menu
 
-            context.SetState(new DriverState());
+            context.SetState(new DriverStartedState());
         }
     }
 }

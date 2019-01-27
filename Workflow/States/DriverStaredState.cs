@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 
 namespace ViberBot.Workflow.States
 {
-    public class DriverState : State
+    public class DriverStartedState : State
     {
         public override async Task Start(string receiverId)
         {
