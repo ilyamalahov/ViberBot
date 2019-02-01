@@ -6,12 +6,12 @@ using ViberBot.Workflow.States;
 
 namespace ViberBot.Services
 {
-    public class InMemoryUserStateMachineService : IUserStateMachineService
+    public class InMemoryStateMachineService : IStateMachineService
     {
         private readonly ISendMessageService sendMessageService;
         private readonly ConcurrentDictionary<string, IContext> stateProcesses;
 
-        public InMemoryUserStateMachineService(ISendMessageService sendMessageService)
+        public InMemoryStateMachineService(ISendMessageService sendMessageService)
         {
             this.sendMessageService = sendMessageService;
 

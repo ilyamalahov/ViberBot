@@ -2,7 +2,7 @@ using ViberBot.Workflow;
 
 namespace ViberBot.Services
 {
-    public interface IUserStateMachineService
+    public interface IStateMachineService
     {
         IContext Add(string userId);
         IContext Get(string userId);

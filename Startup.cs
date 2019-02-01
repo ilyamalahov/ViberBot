@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Viber.Bot;
+using ViberBot.Middlewares;
 using ViberBot.Options;
 using ViberBot.Services;
 
@@ -22,24 +23,30 @@ namespace ViberBot
         public void ConfigureServices(IServiceCollection services)
         {
             // Configure viber bot client
-            var viberBotOptions = Configuration.GetSection("ViberBotOptions").Get<ViberBotOptions>();
+            var viberBotOptions = Configuration.GetSection("ViberBot").Get<ViberBotOptions>();
 
             services.Configure<ViberBotOptions>(options =>
             {
                 options.AuthenticationToken = viberBotOptions.AuthenticationToken;
+                options.WebApiEnpointUrl = viberBotOptions.WebApiEnpointUrl;
             });
 
+            //
             services.AddSingleton<IViberBotClient>(provider => new ViberBotClient(viberBotOptions.AuthenticationToken));
             
-            // Configure viber bot service
-            services.AddSingleton<IRequestService, ViberRequestService>();
-            
-            // 
-            services.AddSingleton<ISendMessageService, SendMessageService>();
-
-            services.AddSingleton<IUserStateMachineService, InMemoryUserStateMachineService>();
+            //
+            services.AddSingleton<IHttpClientService>(provider => new HttpClientService(viberBotOptions.WebApiEnpointUrl));
 
             //
+            services.AddSingleton<IStateMachineService, InMemoryStateMachineService>();
+
+            // 
+            services.AddTransient<IBotService, ViberBotService>();
+            
+            // 
+            services.AddTransient<ISendMessageService, SendMessageService>();
+
+            // 
             services.AddMvcCore();
         }
 
@@ -55,11 +62,13 @@ namespace ViberBot
                 // app.UseHsts();
             }
 
-            //app.UseHttpsRedirection();
-
+            // 
             app.UseStaticFiles();
 
-            // app.UseViberWebhook();
+            // 
+            app.UseMiddleware<ViberBotMiddleware>();
+
+            // 
             app.UseMvcWithDefaultRoute();
         }
     }

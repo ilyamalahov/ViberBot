@@ -1,52 +1,74 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Viber.Bot;
+using Viber.Bot.Enums;
+using Viber.Bot.Messages;
+using Viber.Bot.Models;
+using ViberBot.Models;
+using ViberBot.Repositories;
 
 namespace ViberBot.Services
 {
-    public class ViberRequestService : IRequestService
+    public class ViberBotService : IBotService
     {
-        private readonly IViberBotClient viberBotClient;
-        private readonly IUserStateMachineService userStateMachineService;
-        private readonly ILogger<ViberRequestService> logger;
+        private readonly ISendMessageService sendMessageService;
+        private readonly IHttpClientService httpClientService;
+        private readonly IPeopleRepository peopleRepository;
+        private readonly ILogger<ViberBotService> logger;
 
-        public ViberRequestService(
-            IViberBotClient viberBotClient,
-            IUserStateMachineService userStateMachineService,
-            ILogger<ViberRequestService> logger
+        public ViberBotService(
+            ISendMessageService sendMessageService,
+            IHttpClientService httpClientService,
+            IPeopleRepository peopleRepository,
+            ILogger<ViberBotService> logger
             )
         {
-            this.viberBotClient = viberBotClient;
-            this.userStateMachineService = userStateMachineService;
+            this.sendMessageService = sendMessageService;
+            this.httpClientService = httpClientService;
+            this.peopleRepository = peopleRepository;
             this.logger = logger;
         }
 
-        public async Task ReceiveMessage(User sender, MessageBase message)
-        {
-            logger.LogInformation("Receive message from user \"{sender.Id}\"", sender.Id);
-
-            var stateContext = userStateMachineService.Get(sender.Id);
-
-            await stateContext.ProcessFlow(sender.Id, (message as TextMessage).Text);
-        }
-
-        public async Task ConversationStarted(string userId)
+        public async Task ReceiveMessage(string senderId, string messageText)
         {
             try
             {
-                // Conversation started
-                logger.LogInformation("User \"{sender.Id}\" started conversation", userId);
+                if (messageText == "OK")
+                {
+                    await Subscribed(senderId);
+
+                    return;
+                }
 
                 // 
-                // var stateContext = userStateMachineService.Add(userId);
+                var people = await peopleRepository.GetPeopleByIdAsync(senderId);
+
+                await SendMessage(people.Id, MessageType.Text);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task ConversationStarted(string userId, string userName, string userAvatarUrl)
+        {
+            try
+            {
+                // 
+                var people = await peopleRepository.GetOrAddPeopleAsync(userId, userName, userAvatarUrl);
 
                 // 
-                // await stateContext.Trigger(Workflow.Command.Start);
+                await sendMessageService.SendSubscribeMenuAsync(userId);
+
+                // 
+                await SendChangedState(people.Id, ServiceState.ConversationStarted);
             }
             catch (Exception ex)
             {
@@ -54,18 +76,18 @@ namespace ViberBot.Services
             }
         }
 
-        public async Task Subscribed(User user)
+        public async Task Subscribed(string userId)
         {
             try
             {
-                // User subscribe to channel
-                logger.LogInformation("User \"{user.Id}\" subscribed to channel", user.Id);
+                //
+                await peopleRepository.UpdateContactServiceStateAsync(userId, ServiceState.Subscribed);
 
                 // 
-                var stateMachine = userStateMachineService.Add(user.Id);
+                var people = await peopleRepository.GetPeopleByIdAsync(userId);
 
                 // 
-                await stateMachine.Start(user.Id);
+                await SendChangedState(people.Id, ServiceState.Subscribed);
             }
             catch (Exception ex)
             {
@@ -75,14 +97,16 @@ namespace ViberBot.Services
 
         public async Task UnSubscribed(string userId)
         {
-
             try
             {
-                // User subscribe to channel
-                logger.LogInformation("User \"{userId}\" unsubscribed from channel", userId);
+                //
+                await peopleRepository.UpdateContactServiceStateAsync(userId, ServiceState.Unsubscribed);
 
                 // 
-                userStateMachineService.Delete(userId);
+                var people = await peopleRepository.GetPeopleByIdAsync(userId);
+
+                // 
+                await SendChangedState(people.Id, ServiceState.Unsubscribed);
             }
             catch (Exception ex)
             {
@@ -90,80 +114,36 @@ namespace ViberBot.Services
             }
         }
 
-        // /// <summary>
-        // /// Загружает файл/изображение из Viber на сервер
-        // /// </summary>
-        // /// <param name="url">Web-адрес</param>
-        // /// <param name="fileName">Имя файла</param>
-        // /// <param name="userId">Уникальный идентификатор пользователя Viber</param>
-        // /// <returns>Результат загрузки</returns>
-        // private bool DownloadFile(string url, string fileName, string userId)
-        // {
-        //     // Create a user directory if it does not exists
-        //     logger.LogInformation("Create a user directory if it does not exists");
-
-        //     var userFolder = Path.Combine("assets", "users", userId);
-
-        //     Directory.CreateDirectory(userFolder);
-
-        //     // Asset path
-        //     var assetPath = Path.Combine(userFolder, fileName);
-
-        //     if (File.Exists(assetPath))
-        //     {
-        //         logger.LogError("File \"{fileName}\" already exists", fileName);
-
-        //         return false;
-        //     }
-
-        //     // Download file
-        //     logger.LogInformation("Process file download");
-
-        //     using (var client = new WebClient())
-        //     {
-        //         client.DownloadFileAsync(new Uri(url), assetPath);
-        //     }
-
-        //     return true;
-        // }
-
-        public async Task HandleRequest(HttpContext context)
+        private async Task<HttpResponseMessage> SendMessage(Guid agentId, MessageType messageType)
         {
-            // Validate viber signature
-            logger.LogInformation("Validate viber content signature");
+            var botId = 1;
 
-            var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
-
-            var signatureHeader = context.Request.Headers[ViberBotClient.XViberContentSignatureHeader];
-
-            var isSignatureValid = viberBotClient.ValidateWebhookHash(signatureHeader, body);
-
-            if (!isSignatureValid)
+            // 
+            var parameters = new
             {
-                throw new InvalidOperationException("Invalid signature");
-            }
+                service = "Viber",
+                botId,
+                agentId,
+                type = (int)messageType
+            };
 
-            // Signature is valid
-            logger.LogInformation("Signature valid");
+            return await httpClientService.SendGetAsync("in", parameters);
+        }
 
-            // Deserialize JSON callback data
-            var callbackData = JsonConvert.DeserializeObject<CallbackData>(body);
+        private async Task<HttpResponseMessage> SendChangedState(Guid agentId, ServiceState newState)
+        {
+            var botId = 1;
 
-            switch (callbackData.Event)
+            // 
+            var parameters = new
             {
-                case EventType.Subscribed:
-                    await Subscribed(callbackData.User);
-                    break;
-                case EventType.Unsubscribed:
-                    await UnSubscribed(callbackData.UserId);
-                    break;
-                case EventType.ConversationStarted:
-                    await ConversationStarted(callbackData.User.Id);
-                    break;
-                case EventType.Message:
-                    await ReceiveMessage(callbackData.Sender, callbackData.Message);
-                    break;
-            }
+                service = "Viber",
+                botId,
+                agentId,
+                newStateId = (int)newState
+            };
+
+            return await httpClientService.SendGetAsync("change_state", parameters);
         }
     }
 }

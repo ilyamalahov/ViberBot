@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Viber.Bot;
+using Viber.Bot.Enums;
+using Viber.Bot.Messages;
+using Viber.Bot.Models;
 
 namespace ViberBot.Services
 {
@@ -13,171 +16,90 @@ namespace ViberBot.Services
             this.viberBotClient = viberBotClient;
         }
 
-        public async Task SendContainerPlaceNameMenuAsync(string receiverId)
+        public async Task SendSubscribeMenuAsync(string receiverId)
         {
+            var messageText = "Нажмите кнопку \"OK\", чтобы продолжить";
+
+            // Keyboard buttons
             var buttons = new[]
             {
                 new KeyboardButton
                 {
-                    Columns = 3,
+                    Columns = 6,
                     Rows = 1,
-                    Text = "Отправка текста",
+                    Text = "OK",
                     ActionType = KeyboardActionType.Reply,
-                    ActionBody = "SendContainerPlaceName"
-                },
-                new KeyboardButton
-                {
-                    Columns = 3,
-                    Rows = 1,
-                    Text = "Назад",
-                    ActionType = KeyboardActionType.Reply,
-                    ActionBody = "ToStart"
+                    ActionBody = "OK"
                 }
             };
 
-            await SendKeyboardMessageAsync(receiverId, buttons);
-        }
-
-        public async Task SendContainerPlacesMenuAsync(string receiverId, string[] containerPlaces)
-        {
-            var buttons = new List<KeyboardButton>();
-
-            foreach (var containerPlace in containerPlaces)
-            {
-                buttons.Add(new KeyboardButton
-                {
-                    Columns = 1,
-                    Rows = 1,
-                    Text = containerPlace,
-                    ActionType = KeyboardActionType.Reply,
-                    ActionBody = "SelectedPlace"
-                });
-            }
-
-            // 
-            buttons.Add(new KeyboardButton
-            {
-                Columns = 6,
-                Rows = 1,
-                Text = "Назад",
-                ActionType = KeyboardActionType.Reply,
-                ActionBody = "ToStart"
-            });
-
-            await SendKeyboardMessageAsync(receiverId, buttons);
-        }
-
-        public async Task SendProblemContentMenuAsync(string receiverId)
-        {
-            var buttons = new[]
-            {
-                new KeyboardButton
-                {
-                    Columns = 3,
-                    Rows = 1,
-                    Text = "Отправка текста/фото/видео",
-                    ActionType = KeyboardActionType.Reply,
-                    ActionBody = "SendProblemContent"
-                },
-                new KeyboardButton
-                {
-                    Columns = 3,
-                    Rows = 1,
-                    Text = "Назад",
-                    ActionType = KeyboardActionType.Reply,
-                    ActionBody = "ToProblemStart"
-                }
-            };
-
-            await SendKeyboardMessageAsync(receiverId, buttons);
-        }
-
-        public async Task SendProblemMenuAsync(string receiverId)
-        {
-            var buttons = new[]
-            {
-                new KeyboardButton
-                {
-                    Columns = 2,
-                    Rows = 1,
-                    Text = "Проблема",
-                    ActionType = KeyboardActionType.Reply,
-                    ActionBody = "RegisterProblem"
-                },
-                new KeyboardButton
-                {
-                    Columns = 2,
-                    Rows = 1,
-                    Text = "До",
-                    ActionType = KeyboardActionType.Reply,
-                    ActionBody = "RegisterBeforeProblem"
-                },
-                new KeyboardButton
-                {
-                    Columns = 2,
-                    Rows = 1,
-                    Text = "После",
-                    ActionType = KeyboardActionType.Reply,
-                    ActionBody = "RegisterAfterProblem"
-                }
-            };
-            
-            await SendKeyboardMessageAsync(receiverId, buttons);
+            // Send keyboard message
+            await SendKeyboardMessage(receiverId, messageText, buttons);
         }
 
         public async Task SendStartedMenuAsync(string receiverId)
         {
-            var buttons = new []
+            var caption = "Test";
+            var imageUrl = "http://mgzavrebi.ge/site/local_sources/images/room_photo/room_photo_1_03a21d6e6d84361de45d6c83a51d77d0.jpg";
+
+            var message = new CarouselMessage
             {
-                new KeyboardButton
+                Receiver = receiverId,
+                MinApiVersion = 2,
+                AlternateText = "Альтернативный текст",
+                CarouselContent = new CarouselContent
                 {
-                    Columns = 2,
-                    Rows = 1,
-                    Text = "КП рядом",
-                    ActionType = KeyboardActionType.Reply,
-                    ActionBody = "ControlPointNear"
-                },
-                new KeyboardButton
-                {
-                    Columns = 2,
-                    Rows = 1,
-                    Text = "Поиск КП по имени",
-                    ActionType = KeyboardActionType.Reply,
-                    ActionBody = "ControlPointSearch"
-                },
-                new KeyboardButton
-                {
-                    Columns = 2,
-                    Rows = 1,
-                    Text = "<b>В начало</b>",
-                    ActionType = KeyboardActionType.Reply,
-                    ActionBody = "ToStart",
-                    BackgroundColor = "#f4e542"
+                    ButtonsGroupColumns = 6,
+                    ButtonsGroupRows = 6,
+                    Buttons = new[]
+                    {
+                        new KeyboardButton
+                        {
+                            Columns = 6,
+                            Rows = 2,
+                            Text = caption,
+                            ActionType = KeyboardActionType.None
+                        },
+                        new KeyboardButton
+                        {
+                            Columns = 6,
+                            Rows = 3,
+                            ActionType = KeyboardActionType.None,
+                            Image = imageUrl
+                        },
+                        new KeyboardButton
+                        {
+                            Columns = 6,
+                            Rows = 1,
+                            Text = "OK",
+                            ActionType = KeyboardActionType.None
+                        }
+                    }
                 }
             };
 
-            await SendKeyboardMessageAsync(receiverId, buttons);
+            await viberBotClient.SendCarouselMessageAsync(message);
+        }
+
+        public async Task SendContainerAreasMenuAsync(string receiverId)
+        {
+        }
+
+        public async Task SendFixationMenuAsync(string receiverId)
+        {
         }
 
         public async Task SendMessageAsync(string receiverId, string messageText)
         {
-            var textMessage = new TextMessage
-            {
-                Receiver = receiverId,
-                Text = messageText
-            };
-
-            // Process keyboard message send
-            await viberBotClient.SendTextMessageAsync(textMessage);
         }
 
-        private async Task SendKeyboardMessageAsync(string receiverId, ICollection<KeyboardButton> buttons)
+        private async Task SendKeyboardMessage(string receiverId, string messageText, ICollection<KeyboardButton> buttons)
         {
             // Keyboard message
             var keyboardMessage = new KeyboardMessage
             {
                 Receiver = receiverId,
-                Text = "Выберите нужный элемент из списка",
+                Text = messageText,
                 Keyboard = new Keyboard
                 {
                     Buttons = buttons,
@@ -193,12 +115,10 @@ namespace ViberBot.Services
 
     public interface ISendMessageService
     {
-        Task SendMessageAsync(string receiverId, string messageText);
-
+        Task SendSubscribeMenuAsync(string receiverId);
         Task SendStartedMenuAsync(string receiverId);
-        Task SendContainerPlacesMenuAsync(string receiverId, string[] containerPlaces);
-        Task SendProblemMenuAsync(string receiverId);
-        Task SendProblemContentMenuAsync(string receiverId);
-        Task SendContainerPlaceNameMenuAsync(string receiverId);
+        Task SendContainerAreasMenuAsync(string receiverId);
+        Task SendFixationMenuAsync(string receiverId);
+        Task SendMessageAsync(string receiverId, string messageText);
     }
 }
