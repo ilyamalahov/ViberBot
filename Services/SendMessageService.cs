@@ -46,9 +46,9 @@ namespace ViberBot.Services
             {
                 Receiver = receiverId,
                 MinApiVersion = 2,
-                AlternateText = "Альтернативный текст",
-                CarouselContent = new CarouselContent
+                CarouselContent = new Carousel
                 {
+                    AlternateText = "",
                     ButtonsGroupColumns = 6,
                     ButtonsGroupRows = 6,
                     Buttons = new[]

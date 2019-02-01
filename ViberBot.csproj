@@ -17,8 +17,7 @@
 
   <ItemGroup>
     <Reference Include="Viber.Bot">
-      <HintPath>C:\Users\mie\source\repos\viber.bot\Viber.Bot\bin\Release\netcoreapp2.0\Viber.Bot.dll</HintPath>
+      <HintPath>C:\Viber.Bot\Viber.Bot.dll</HintPath>
     </Reference>
   </ItemGroup>
-
 </Project>
