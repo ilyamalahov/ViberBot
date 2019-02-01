@@ -43,7 +43,7 @@ namespace ViberBot.Workflow
             currentState.SetContext(this);
         }
 
-        private Dictionary<Command, Func<string, Task>> triggers;
+        private IDictionary<Command, Func<string, Task>> triggers;
 
         public async Task Start(string receiverId) => await currentState.Start(receiverId);
         public async Task SearchContainerPlacesNerby() => await currentState.SearchContainerPlacesNerby();
@@ -53,19 +53,14 @@ namespace ViberBot.Workflow
         public async Task RegisterBeforeProblem() => await currentState.RegisterBeforeProblem();
         public async Task RegisterAfterProblem() => await currentState.RegisterAfterProblem();
         public async Task SendProblemContent() => await currentState.SendProblemContent();
-        public async Task ProcessFlow(string receiverId, string messageText)
-        {
-
-        }
+        public async Task ProcessFlow(string receiverId, string messageText) { }
 
         public async Task Trigger(Command command)
         {
-            if(!triggers.ContainsKey(command))
+            if(triggers.TryGetValue(command, out var action))
             {
                 throw new Exception("");
             }
-
-            triggers.GetValueOrDefault(command);
         }
     }
 
