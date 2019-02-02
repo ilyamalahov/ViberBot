@@ -9,16 +9,16 @@ namespace ViberBot.Services
     public class InMemoryStateMachineService : IStateMachineService
     {
         private readonly ISendMessageService sendMessageService;
-        private readonly ConcurrentDictionary<string, IContext> stateProcesses;
+        private readonly ConcurrentDictionary<Guid, IContext> stateProcesses;
 
         public InMemoryStateMachineService(ISendMessageService sendMessageService)
         {
             this.sendMessageService = sendMessageService;
 
-            stateProcesses = new ConcurrentDictionary<string, IContext>();
+            stateProcesses = new ConcurrentDictionary<Guid, IContext>();
         }
 
-        public IContext Add(string userId)
+        public IContext Add(Guid userId)
         {
             if(userId == null) throw new ArgumentNullException(nameof(userId));
 
@@ -30,7 +30,7 @@ namespace ViberBot.Services
             return stateProcesses.GetOrAdd(userId, new Context(new StartedState()));
         }
 
-        public void Delete(string userId)
+        public void Delete(Guid userId)
         {
             if(userId == null) throw new ArgumentNullException(nameof(userId));
             
@@ -40,7 +40,7 @@ namespace ViberBot.Services
             }
         }
 
-        public IContext Get(string userId)
+        public IContext Get(Guid userId)
         {
             if(userId == null) throw new ArgumentNullException(nameof(userId));
             

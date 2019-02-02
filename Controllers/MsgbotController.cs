@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ViberBot.Models;
 using ViberBot.Services;
@@ -16,13 +17,13 @@ namespace ViberBot.Controllers
         }
 
         [HttpGet("change_state")]
-        public async void ChangeState(Guid agentId, int botId, string service, int newState)
+        public async Task ChangeState(Guid agentId, int botId, string service, int newStateId)
         {
-            var serviceState = (ServiceState)newState;
+            var serviceState = (ServiceState)newStateId;
 
             if(serviceState == ServiceState.Subscribed)
             {
-                var stateContext = stateMachineService.Add(agentId.ToString());
+                var stateContext = stateMachineService.Add(agentId);
 
                 // ???????
             }

@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Viber.Bot;
 using ViberBot.Middlewares;
 using ViberBot.Options;
+using ViberBot.Repositories;
 using ViberBot.Services;
 
 namespace ViberBot
@@ -22,20 +23,23 @@ namespace ViberBot
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            // 
+            var connectionString = Configuration.GetConnectionString("SqlServerConnection");
+
             // Configure viber bot client
             var viberBotOptions = Configuration.GetSection("ViberBot").Get<ViberBotOptions>();
 
             services.Configure<ViberBotOptions>(options =>
             {
                 options.AuthenticationToken = viberBotOptions.AuthenticationToken;
-                options.WebApiEnpointUrl = viberBotOptions.WebApiEnpointUrl;
+                options.ViberApiEndpointUrl = viberBotOptions.ViberApiEndpointUrl;
             });
 
             //
             services.AddSingleton<IViberBotClient>(provider => new ViberBotClient(viberBotOptions.AuthenticationToken));
             
             //
-            services.AddSingleton<IHttpClientService>(provider => new HttpClientService(viberBotOptions.WebApiEnpointUrl));
+            services.AddSingleton<IHttpClientService>(provider => new HttpClientService(viberBotOptions.ViberApiEndpointUrl));
 
             //
             services.AddSingleton<IStateMachineService, InMemoryStateMachineService>();
@@ -45,6 +49,9 @@ namespace ViberBot
             
             // 
             services.AddTransient<ISendMessageService, SendMessageService>();
+            
+            // 
+            services.AddTransient<IPeopleRepository>(provider => new PeopleRepository(connectionString));
 
             // 
             services.AddMvcCore();

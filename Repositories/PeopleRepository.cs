@@ -77,7 +77,7 @@ namespace ViberBot.Repositories
 
             var peopleContactInsertSql = @"INSERT INTO PeopleLinkContact (PeopleId, ContactId, Remark) VALUES (@peopleId, @contactId, '')";
 
-            using (var connection = new SqlConnection())
+            using (var connection = new SqlConnection(connectionString))
             {
                 // Open database connection
                 await connection.OpenAsync();
