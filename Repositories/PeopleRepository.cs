@@ -19,7 +19,7 @@ namespace ViberBot.Repositories
 
         public async Task<People> GetPeopleByIdAsync(string userId)
         {
-            var peopleSelectSql = @"SELECT *
+            var peopleSelectSql = @"SELECT p.*
                                     FROM dbo.People p
                                     INNER JOIN dbo.PeopleLinkContact plc ON p.Id = plc.PeopleId
                                     INNER JOIN dbo.PeopleContact pc ON plc.ContactId = pc.Id

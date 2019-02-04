@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ViberBot.Models;
 using ViberBot.Services;
+using ViberBot.Services.Http;
+using ViberBot.Services.StateMachine;
 
 namespace ViberBot.Controllers
 {
@@ -10,10 +12,14 @@ namespace ViberBot.Controllers
     public class MsgbotController : ControllerBase
     {
         private readonly IStateMachineService stateMachineService;
+        private readonly IHttpClientService viberApiHttpService;
 
-        public MsgbotController(IStateMachineService stateMachineService)
+        public MsgbotController(
+            IStateMachineService stateMachineService, 
+            IViberApiHttpService viberApiHttpService)
         {
             this.stateMachineService = stateMachineService;
+            this.viberApiHttpService = viberApiHttpService;
         }
 
         [HttpGet("change_state")]
@@ -23,10 +29,16 @@ namespace ViberBot.Controllers
 
             if(serviceState == ServiceState.Subscribed)
             {
-                var stateContext = stateMachineService.Add(agentId);
-
-                // ???????
+                var stateContext = stateMachineService.Get(agentId);
+                
+                await stateContext.Start(agentId);
             }
+        }
+        
+        [HttpGet("in")]
+        public async Task ReceiveMessage(Guid agentId, int botId, string service, int messageTypeId)
+        {
+            
         }
     }
 }

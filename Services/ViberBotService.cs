@@ -12,19 +12,20 @@ using Viber.Bot.Messages;
 using Viber.Bot.Models;
 using ViberBot.Models;
 using ViberBot.Repositories;
+using ViberBot.Services.Http;
 
 namespace ViberBot.Services
 {
     public class ViberBotService : IBotService
     {
         private readonly ISendMessageService sendMessageService;
-        private readonly IHttpClientService httpClientService;
+        private readonly IWebApiHttpService httpClientService;
         private readonly IPeopleRepository peopleRepository;
         private readonly ILogger<ViberBotService> logger;
 
         public ViberBotService(
             ISendMessageService sendMessageService,
-            IHttpClientService httpClientService,
+            IWebApiHttpService httpClientService,
             IPeopleRepository peopleRepository,
             ILogger<ViberBotService> logger
             )

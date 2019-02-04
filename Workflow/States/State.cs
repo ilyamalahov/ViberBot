@@ -17,20 +17,32 @@ namespace ViberBot.Workflow.States
             return Task.CompletedTask;
         }
         
-        public virtual Task Start(string receiverId) { return Task.CompletedTask; }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="agentId"></param>
+        /// <returns></returns>
+        public virtual Task Start(Guid agentId) { return Task.CompletedTask; }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="altitude"></param>
+        /// <param name="latitude"></param>
+        /// <returns></returns>
+        public virtual Task SearchGarbageAreas(double altitude, double latitude) { return Task.CompletedTask; }
 
-        //
-        public virtual Task SearchContainerPlacesNerby() { return Task.CompletedTask; }
-        public virtual Task SendContainerPlaceName() { return Task.CompletedTask; }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="garbageAreaName"></param>
+        /// <returns></returns>
+        public virtual Task SelectGarbageArea(string garbageAreaName) { return Task.CompletedTask; }
 
-        //
-        public virtual Task SearchContainerPlacesByName() { return Task.CompletedTask; }
-        public virtual Task SelectContainerPlace(string containerPlaceName) { return Task.CompletedTask; }
-
-        // 
-        public virtual Task RegisterProblem() { return Task.CompletedTask; }
-        public virtual Task RegisterBeforeProblem() { return Task.CompletedTask; }
-        public virtual Task RegisterAfterProblem() { return Task.CompletedTask; }
-        public virtual Task SendProblemContent() { return Task.CompletedTask; }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public virtual Task WaitMediaFile() { return Task.CompletedTask; }
     }
 }

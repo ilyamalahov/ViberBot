@@ -7,6 +7,8 @@ using ViberBot.Middlewares;
 using ViberBot.Options;
 using ViberBot.Repositories;
 using ViberBot.Services;
+using ViberBot.Services.Http;
+using ViberBot.Services.StateMachine;
 
 namespace ViberBot
 {
@@ -32,14 +34,17 @@ namespace ViberBot
             services.Configure<ViberBotOptions>(options =>
             {
                 options.AuthenticationToken = viberBotOptions.AuthenticationToken;
-                options.ViberApiEndpointUrl = viberBotOptions.ViberApiEndpointUrl;
+                options.WebApiEndpoint = viberBotOptions.WebApiEndpoint;
             });
 
             //
             services.AddSingleton<IViberBotClient>(provider => new ViberBotClient(viberBotOptions.AuthenticationToken));
             
             //
-            services.AddSingleton<IHttpClientService>(provider => new HttpClientService(viberBotOptions.ViberApiEndpointUrl));
+            services.AddSingleton<IViberApiHttpService>(provider => new ViberApiHttpService(viberBotOptions.ViberApiEndpoint));
+            
+            //
+            services.AddSingleton<IWebApiHttpService>(provider => new WebApiHttpService(viberBotOptions.WebApiEndpoint));
 
             //
             services.AddSingleton<IStateMachineService, InMemoryStateMachineService>();
@@ -52,6 +57,8 @@ namespace ViberBot
             
             // 
             services.AddTransient<IPeopleRepository>(provider => new PeopleRepository(connectionString));
+
+            services.AddTransient<IViberBotRepository>(provider => new ViberBotRepository(connectionString));
 
             // 
             services.AddMvcCore();
@@ -73,7 +80,7 @@ namespace ViberBot
             app.UseStaticFiles();
 
             // 
-            app.UseMiddleware<ViberBotMiddleware>();
+            // app.UseMiddleware<ViberBotMiddleware>();
 
             // 
             app.UseMvcWithDefaultRoute();

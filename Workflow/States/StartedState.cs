@@ -1,11 +1,19 @@
 using System;
 using System.Threading.Tasks;
+using ViberBot.Services.Http;
 
 namespace ViberBot.Workflow.States
 {
     public class StartedState : State
     {
-        public override async Task Start(string receiverId)
+        private readonly IViberApiHttpService viberApiHttpService;
+
+        public StartedState(IViberApiHttpService viberApiHttpService)
+        {
+            this.viberApiHttpService = viberApiHttpService;
+        }
+
+        public override async Task Start(Guid agentId)
         {
             // Check if driver
 
@@ -13,7 +21,9 @@ namespace ViberBot.Workflow.States
 
             // If Driver - Send Driver Started Menu
 
-            context.SetState(new DriverStartedState());
+            await viberApiHttpService.SendGetAsync("in");
+
+            context.SetState(new DriverState(viberApiHttpService));
         }
     }
 }

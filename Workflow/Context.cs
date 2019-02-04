@@ -9,30 +9,25 @@ namespace ViberBot.Workflow
 {
     public interface IContext
     {
-        Task Start(string receiverId);
-        Task SearchContainerPlacesNerby();
-        Task SendContainerPlaceName();
-        Task SearchContainerPlacesByName();
-        Task RegisterProblem();
-        Task RegisterBeforeProblem();
-        Task RegisterAfterProblem();
-        Task SendProblemContent();
-        Task ProcessFlow(string receiverId, string messageText);
+        Task Start(Guid agentId);
+        Task SearchGarbageAreas(double altitude, double latitude);
+        Task SelectGarbageArea(string garbageAreaName);
+        Task WaitMediaFile();
 
         void SetState(State state);
-        Task Trigger(Command command);
     }
     public class Context : IContext
     {
         private State currentState;
 
+        // private IDictionary<Command, Func<string, Task>> triggers;
         public Context(State initialState)
         {
-            triggers = new Dictionary<Command, Func<string, Task>>()
-            {
-                { Command.Start, async (string receiverId) => await currentState.Start(receiverId) },
-                { Command.SearchContainerPlacesNerby, async (receiverId) => await currentState.SearchContainerPlacesNerby() }
-            };
+            // triggers = new Dictionary<Command, Func<string, Task>>()
+            // {
+            //     { Command.Start, async (string receiverId) => await currentState.Start(receiverId) },
+            //     { Command.SearchContainerPlacesNerby, async (receiverId) => await currentState.SearchContainerPlacesNerby() }
+            // };
 
             SetState(initialState);
         }
@@ -43,37 +38,22 @@ namespace ViberBot.Workflow
             currentState.SetContext(this);
         }
 
-        private IDictionary<Command, Func<string, Task>> triggers;
+        public async Task Start(Guid agentId) => await currentState.Start(agentId);
+        
+        /// <inheritdoc/>
+        public async Task SearchGarbageAreas(double altitude, double latitude) => await currentState.SearchGarbageAreas(altitude, latitude);
 
-        public async Task Start(string receiverId) => await currentState.Start(receiverId);
-        public async Task SearchContainerPlacesNerby() => await currentState.SearchContainerPlacesNerby();
-        public async Task SendContainerPlaceName() => await currentState.SendContainerPlaceName();
-        public async Task SearchContainerPlacesByName() => await currentState.SearchContainerPlacesByName();
-        public async Task RegisterProblem() => await currentState.RegisterProblem();
-        public async Task RegisterBeforeProblem() => await currentState.RegisterBeforeProblem();
-        public async Task RegisterAfterProblem() => await currentState.RegisterAfterProblem();
-        public async Task SendProblemContent() => await currentState.SendProblemContent();
-        public async Task ProcessFlow(string receiverId, string messageText) { }
+        public async Task SelectGarbageArea(string garbageAreaName) => await currentState.SelectGarbageArea(garbageAreaName);
 
-        public async Task Trigger(Command command)
-        {
-            if(triggers.TryGetValue(command, out var action))
-            {
-                throw new Exception("");
-            }
-        }
+        public async Task WaitMediaFile() => await currentState.WaitMediaFile();
     }
 
     [JsonConverter(typeof(StringEnumConverter))]
     public enum Command
     {
         Start,
-        SearchContainerPlacesNerby,
-        SendContainerPlaceName,
-        SearchContainerPlacesByName,
-        RegisterProblem,
-        RegisterBeforeProblem,
-        RegisterAfterProblem,
-        SendProblemContent
+        SearchGarbageAreas,
+        SelectGarbageArea,
+        WaitMediaFile
     }
 }

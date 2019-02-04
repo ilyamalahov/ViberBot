@@ -6,13 +6,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Newtonsoft.Json;
 using ViberBot.Extensions;
 
-namespace ViberBot.Services
+namespace ViberBot.Services.Http
 {
-    public class HttpClientService : IHttpClientService
+    public class ViberApiHttpService : IViberApiHttpService
     {
         private readonly HttpClient httpClient;
 
-        public HttpClientService(string baseUrl)
+        public ViberApiHttpService(string baseUrl)
         {
             var httpClientHandler = new HttpClientHandler() { UseDefaultCredentials = true };
 
@@ -52,22 +52,7 @@ namespace ViberBot.Services
         }
     }
 
-    public interface IHttpClientService
+    public interface IViberApiHttpService : IHttpClientService
     {
-        /// <summary>
-        /// Отправляет GET запрос на Web API сервис
-        /// </summary>
-        /// <param name="url">Адрес конечной точки (Endpoint)</param>
-        /// <param name="parametersObj">Дополнительные параметры</param>
-        /// <returns>Сообщение ответа HTTP</returns>
-        Task<HttpResponseMessage> SendGetAsync(string url, object parametersObj = null);
-
-        /// <summary>
-        /// Отправляет POST запрос на Web API сервис
-        /// </summary>
-        /// <param name="url">Адрес конечной точки (Endpoint)</param>
-        /// <param name="parameters">Дополнительные параметры</param>
-        /// <returns>Сообщение ответа HTTP</returns>
-        Task<HttpResponseMessage> SendPostAsync(string url, object parametersObj = null);
     }
 }
