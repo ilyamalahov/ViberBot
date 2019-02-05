@@ -13,11 +13,11 @@ namespace ViberBot.Workflow.States
             this.viberApiHttpService = viberApiHttpService;
         }
 
-        public override async Task Start(Guid agentId)
+        public override async Task Start(int botId, Guid agentId)
         {
             context.SetState(new StartedState(viberApiHttpService));
 
-            await context.Start(agentId);
+            await context.Start(botId, agentId);
         }
 
         public override async Task SearchGarbageAreas(double altitude, double latitude)

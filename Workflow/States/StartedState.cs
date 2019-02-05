@@ -13,15 +13,15 @@ namespace ViberBot.Workflow.States
             this.viberApiHttpService = viberApiHttpService;
         }
 
-        public override async Task Start(Guid agentId)
+        public override async Task Start(int botId, Guid agentId)
         {
-            // Check if driver
+            var parameters = new
+            {
+                botId,
+                agentId
+            };
 
-            // If User - Another action
-
-            // If Driver - Send Driver Started Menu
-
-            await viberApiHttpService.SendGetAsync("in");
+            await viberApiHttpService.SendGetAsync("start", parameters);
 
             context.SetState(new DriverState(viberApiHttpService));
         }

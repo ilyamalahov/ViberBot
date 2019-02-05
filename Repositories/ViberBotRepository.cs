@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.SqlClient;
 using System.Threading.Tasks;
 using System.Xml;
+using Dapper;
 using ViberBot.Entities;
 
 namespace ViberBot.Repositories
@@ -17,14 +19,22 @@ namespace ViberBot.Repositories
 
         public async Task<IEnumerable<ViberBotSetting>> GetAll()
         {
-            return await Task.FromResult<IEnumerable<ViberBotSetting>>(null);
+            var sql = "SELECT * FROM dbo.ViberBot";
+
+            using(var connection = new SqlConnection(connectionString))
+            {
+                return await connection.QueryAsync<ViberBotSetting>(sql);
+            }
         }
 
         public async Task<ViberBotSetting> GetById(int id)
         {
-            var sql = @"SELECT * FROM dbo.ViberBot WHERE Id = @id";
+            var sql = "SELECT * FROM dbo.ViberBot WHERE Id = @id";
 
-            return await Task.FromResult<ViberBotSetting>(null);
+            using(var connection = new SqlConnection(connectionString))
+            {
+                return await connection.QueryFirstOrDefaultAsync<ViberBotSetting>(sql, new { id });
+            }
         }
     }
 
@@ -32,18 +42,5 @@ namespace ViberBot.Repositories
     {
         Task<ViberBotSetting> GetById(int id);
         Task<IEnumerable<ViberBotSetting>> GetAll();
-    }
-}
-
-namespace ViberBot.Entities
-{
-    [Table("dbo.ViberBot")]
-    public class ViberBotSetting
-    {
-        public int Id { get; set; }
-        public int OrganizationId { get; set; }
-        public string AppKey { get; set; }
-        public string ViberIncomeHost { get; set; }
-        public XmlElement InvitationMessage { get; set; }
     }
 }

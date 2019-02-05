@@ -36,13 +36,13 @@ namespace ViberBot.Services
             this.logger = logger;
         }
 
-        public async Task ReceiveMessage(string senderId, string messageText)
+        public async Task ReceiveMessage(int botId, string senderId, string messageText)
         {
             try
             {
                 if (messageText == "OK")
                 {
-                    await Subscribed(senderId);
+                    await Subscribed(botId, senderId);
 
                     return;
                 }
@@ -50,7 +50,7 @@ namespace ViberBot.Services
                 // 
                 var people = await peopleRepository.GetPeopleByIdAsync(senderId);
 
-                await SendMessage(people.Id, MessageType.Text);
+                await SendMessage(botId, people.Id, MessageType.Text);
             }
             catch (Exception)
             {
@@ -58,7 +58,7 @@ namespace ViberBot.Services
             }
         }
 
-        public async Task ConversationStarted(string userId, string userName, string userAvatarUrl)
+        public async Task ConversationStarted(int botId, string userId, string userName, string userAvatarUrl)
         {
             try
             {
@@ -66,10 +66,10 @@ namespace ViberBot.Services
                 var people = await peopleRepository.GetOrAddPeopleAsync(userId, userName, userAvatarUrl);
 
                 // 
-                await sendMessageService.SendSubscribeMenuAsync(userId);
+                await sendMessageService.SendSubscribeMenuAsync(botId, userId);
 
                 // 
-                await SendChangedState(people.Id, ServiceState.ConversationStarted);
+                await SendChangedState(botId, people.Id, ServiceState.ConversationStarted);
             }
             catch (Exception ex)
             {
@@ -77,7 +77,7 @@ namespace ViberBot.Services
             }
         }
 
-        public async Task Subscribed(string userId)
+        public async Task Subscribed(int botId, string userId)
         {
             try
             {
@@ -88,7 +88,7 @@ namespace ViberBot.Services
                 var people = await peopleRepository.GetPeopleByIdAsync(userId);
 
                 // 
-                await SendChangedState(people.Id, ServiceState.Subscribed);
+                await SendChangedState(botId, people.Id, ServiceState.Subscribed);
             }
             catch (Exception ex)
             {
@@ -96,7 +96,7 @@ namespace ViberBot.Services
             }
         }
 
-        public async Task UnSubscribed(string userId)
+        public async Task UnSubscribed(int botId, string userId)
         {
             try
             {
@@ -107,7 +107,7 @@ namespace ViberBot.Services
                 var people = await peopleRepository.GetPeopleByIdAsync(userId);
 
                 // 
-                await SendChangedState(people.Id, ServiceState.Unsubscribed);
+                await SendChangedState(botId, people.Id, ServiceState.Unsubscribed);
             }
             catch (Exception ex)
             {
@@ -115,10 +115,8 @@ namespace ViberBot.Services
             }
         }
 
-        private async Task<HttpResponseMessage> SendMessage(Guid agentId, MessageType messageType)
+        private async Task<HttpResponseMessage> SendMessage(int botId, Guid agentId, MessageType messageType)
         {
-            var botId = 1;
-
             // 
             var parameters = new
             {
@@ -131,10 +129,8 @@ namespace ViberBot.Services
             return await httpClientService.SendGetAsync("in", parameters);
         }
 
-        private async Task<HttpResponseMessage> SendChangedState(Guid agentId, ServiceState newState)
+        private async Task<HttpResponseMessage> SendChangedState(int botId, Guid agentId, ServiceState newState)
         {
-            var botId = 1;
-
             // 
             var parameters = new
             {

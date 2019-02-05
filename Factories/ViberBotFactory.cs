@@ -30,15 +30,17 @@ namespace ViberBot.Factories
 
         public async Task<IViberBotClient> GetClient(int botId)
         {
-            if(!botClients.TryGetValue(botId, out var client))
+            if(!botClients.ContainsKey(botId))
             {
-                if(!await AddClient(botId))
+                var addResult = await AddClient(botId);
+
+                if(!addResult)
                 {
                     return null;
                 }
             }
 
-            return client;
+            return botClients.GetValueOrDefault(botId);
         }
 
         public async Task<bool> AddClient(int botId)
@@ -57,7 +59,7 @@ namespace ViberBot.Factories
 
             lock (botClients)
             {
-                return botClients.TryAdd(botSetting.Id, new ViberBotClient(botSetting.AppKey));
+                return botClients.TryAdd(botId, new ViberBotClient(botSetting.AppKey));
             }
         }
     }

@@ -9,7 +9,7 @@ namespace ViberBot.Workflow
 {
     public interface IContext
     {
-        Task Start(Guid agentId);
+        Task Start(int botId, Guid agentId);
         Task SearchGarbageAreas(double altitude, double latitude);
         Task SelectGarbageArea(string garbageAreaName);
         Task WaitMediaFile();
@@ -38,13 +38,16 @@ namespace ViberBot.Workflow
             currentState.SetContext(this);
         }
 
-        public async Task Start(Guid agentId) => await currentState.Start(agentId);
+        /// <inheritdoc/>
+        public async Task Start(int botId, Guid agentId) => await currentState.Start(botId, agentId);
         
         /// <inheritdoc/>
         public async Task SearchGarbageAreas(double altitude, double latitude) => await currentState.SearchGarbageAreas(altitude, latitude);
 
+        /// <inheritdoc/>
         public async Task SelectGarbageArea(string garbageAreaName) => await currentState.SelectGarbageArea(garbageAreaName);
 
+        /// <inheritdoc/>
         public async Task WaitMediaFile() => await currentState.WaitMediaFile();
     }
 

@@ -55,16 +55,16 @@ namespace ViberBot.Middlewares
                 switch (callbackData.Event)
                 {
                     case EventType.Subscribed:
-                        await viberBotService.Subscribed(user.Id);
+                        await viberBotService.Subscribed(0, user.Id);
                         break;
                     case EventType.Unsubscribed:
-                        await viberBotService.UnSubscribed(callbackData.UserId);
+                        await viberBotService.UnSubscribed(0, callbackData.UserId);
                         break;
                     case EventType.ConversationStarted:
-                        await viberBotService.ConversationStarted(user.Id, user.Name, user.Avatar);
+                        await viberBotService.ConversationStarted(0, user.Id, user.Name, user.Avatar);
                         break;
                     case EventType.Message:
-                        await viberBotService.ReceiveMessage(callbackData.Sender.Id, (callbackData.Message as TextMessage).Text);
+                        await viberBotService.ReceiveMessage(0, callbackData.Sender.Id, (callbackData.Message as TextMessage).Text);
                         break;
                 }
             }

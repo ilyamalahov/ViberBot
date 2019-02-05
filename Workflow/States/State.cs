@@ -22,7 +22,7 @@ namespace ViberBot.Workflow.States
         /// </summary>
         /// <param name="agentId"></param>
         /// <returns></returns>
-        public virtual Task Start(Guid agentId) { return Task.CompletedTask; }
+        public virtual Task Start(int botId, Guid agentId) { return Task.CompletedTask; }
         
         /// <summary>
         /// 

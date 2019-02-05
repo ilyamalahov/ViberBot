@@ -1,22 +1,29 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Serialization;
 using Viber.Bot;
 using Viber.Bot.Enums;
 using Viber.Bot.Messages;
 using Viber.Bot.Models;
+using ViberBot.Factories;
 
 namespace ViberBot.Services
 {
     public class SendMessageService : ISendMessageService
     {
-        private readonly IViberBotClient viberBotClient;
+        private readonly IViberBotFactory viberBotFactory;
 
-        public SendMessageService(IViberBotClient viberBotClient)
+        // private readonly IViberBotClient viberBotClient;
+
+        public SendMessageService(IViberBotFactory viberBotFactory)
         {
-            this.viberBotClient = viberBotClient;
+            // this.viberBotClient = viberBotClient;
+            this.viberBotFactory = viberBotFactory;
         }
 
-        public async Task SendSubscribeMenuAsync(string receiverId)
+        public async Task SendSubscribeMenuAsync(int botid, string receiverId)
         {
             var messageText = "Нажмите кнопку \"OK\", чтобы продолжить";
 
@@ -34,48 +41,55 @@ namespace ViberBot.Services
             };
 
             // Send keyboard message
-            await SendKeyboardMessage(receiverId, messageText, buttons);
+            await SendKeyboardMessage(botid, receiverId, messageText, buttons);
         }
 
-        public async Task SendStartedMenuAsync(string receiverId)
+        public async Task SendStartedMenuAsync(int botId, string receiverId, string messageText, string imageUrl)
         {
-            var caption = "Test";
-            var imageUrl = "http://mgzavrebi.ge/site/local_sources/images/room_photo/room_photo_1_03a21d6e6d84361de45d6c83a51d77d0.jpg";
+            var viberBotClient = await viberBotFactory.GetClient(botId);
+
+            // var caption = "Test";
+            // var imageUrl = "http://mgzavrebi.ge/site/local_sources/images/room_photo/room_photo_1_03a21d6e6d84361de45d6c83a51d77d0.jpg";
+
+            Carousel carousel = null;
+
+            var xml = "<carousel><keyboardButton columns=6 rows=2 text=\"Text\"/></carousel>";
+
+            var serializer = new XmlSerializer(typeof(Carousel));
+
+            using (var reader = new StringReader(xml))
+            {
+                carousel = (Carousel)serializer.Deserialize(reader);
+            }
 
             var message = new CarouselMessage
             {
                 Receiver = receiverId,
                 MinApiVersion = 2,
-                CarouselContent = new Carousel
-                {
-                    AlternateText = "",
-                    ButtonsGroupColumns = 6,
-                    ButtonsGroupRows = 6,
-                    Buttons = new[]
-                    {
-                        new KeyboardButton
-                        {
-                            Columns = 6,
-                            Rows = 2,
-                            Text = caption,
-                            ActionType = KeyboardActionType.None
-                        },
-                        new KeyboardButton
-                        {
-                            Columns = 6,
-                            Rows = 3,
-                            ActionType = KeyboardActionType.None,
-                            Image = imageUrl
-                        },
-                        new KeyboardButton
-                        {
-                            Columns = 6,
-                            Rows = 1,
-                            Text = "OK",
-                            ActionType = KeyboardActionType.None
-                        }
-                    }
-                }
+                CarouselContent = carousel
+                // CarouselContent = new Carousel
+                // {
+                //     AlternateText = "",
+                //     ButtonsGroupColumns = 6,
+                //     ButtonsGroupRows = 5,
+                //     Buttons = new[]
+                //     {
+                //         new KeyboardButton
+                //         {
+                //             Columns = 6,
+                //             Rows = 2,
+                //             Text = messageText,
+                //             ActionType = KeyboardActionType.None
+                //         },
+                //         new KeyboardButton
+                //         {
+                //             Columns = 6,
+                //             Rows = 3,
+                //             ActionType = KeyboardActionType.None,
+                //             Image = imageUrl
+                //         }
+                //     }
+                // }
             };
 
             await viberBotClient.SendCarouselMessageAsync(message);
@@ -93,8 +107,10 @@ namespace ViberBot.Services
         {
         }
 
-        private async Task SendKeyboardMessage(string receiverId, string messageText, ICollection<KeyboardButton> buttons)
+        private async Task SendKeyboardMessage(int botId, string receiverId, string messageText, ICollection<KeyboardButton> buttons)
         {
+            var viberBotClient = await viberBotFactory.GetClient(botId);
+
             // Keyboard message
             var keyboardMessage = new KeyboardMessage
             {
@@ -115,8 +131,8 @@ namespace ViberBot.Services
 
     public interface ISendMessageService
     {
-        Task SendSubscribeMenuAsync(string receiverId);
-        Task SendStartedMenuAsync(string receiverId);
+        Task SendSubscribeMenuAsync(int botId, string receiverId);
+        Task SendStartedMenuAsync(int botId, string receiverId, string messageText, string imageUrl);
         Task SendContainerAreasMenuAsync(string receiverId);
         Task SendFixationMenuAsync(string receiverId);
         Task SendMessageAsync(string receiverId, string messageText);

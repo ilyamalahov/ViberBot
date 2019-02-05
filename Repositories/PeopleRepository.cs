@@ -133,6 +133,20 @@ namespace ViberBot.Repositories
                 }
             }
         }
+
+        public async Task<PeopleContact> GetContactById(Guid agentId)
+        {
+            var peopleSelectSql = @"SELECT pc.*
+                                    FROM dbo.PeopleContact pc
+                                    INNER JOIN dbo.PeopleLinkContact plc ON pc.Id = plc.ContactId
+                                    INNER JOIN dbo.People p ON plc.PeopleId = p.Id
+                                    WHERE p.Id = @agentId";
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                return await connection.QueryFirstOrDefaultAsync<PeopleContact>(peopleSelectSql, new { agentId });
+            }
+        }
     }
 
     public interface IPeopleRepository
@@ -140,6 +154,7 @@ namespace ViberBot.Repositories
         Task<People> GetPeopleByIdAsync(string userId);
         Task<People> GetOrAddPeopleAsync(string userId, string userName, string userAvatarUrl);
         Task UpdateContactServiceStateAsync(string userId, ServiceState state);
+        Task<PeopleContact> GetContactById(Guid agentId);
     }
 }
 

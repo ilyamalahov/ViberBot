@@ -23,7 +23,7 @@ namespace ViberBot.Controllers
         }
 
         [HttpGet("change_state")]
-        public async Task ChangeState(Guid agentId, int botId, string service, int newStateId)
+        public async Task ChangeState(int botId, Guid agentId, string service, int newStateId)
         {
             var serviceState = (ServiceState)newStateId;
 
@@ -31,12 +31,12 @@ namespace ViberBot.Controllers
             {
                 var stateContext = stateMachineService.Get(agentId);
                 
-                await stateContext.Start(agentId);
+                await stateContext.Start(botId, agentId);
             }
         }
         
         [HttpGet("in")]
-        public async Task ReceiveMessage(Guid agentId, int botId, string service, int messageTypeId)
+        public async Task ReceiveMessage(int botId, Guid agentId, string service, int messageTypeId)
         {
             
         }

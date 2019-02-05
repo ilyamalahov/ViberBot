@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Viber.Bot;
+using ViberBot.Factories;
 using ViberBot.Middlewares;
 using ViberBot.Options;
 using ViberBot.Repositories;
@@ -38,8 +39,11 @@ namespace ViberBot
             });
 
             //
-            services.AddSingleton<IViberBotClient>(provider => new ViberBotClient(viberBotOptions.AuthenticationToken));
+            // services.AddSingleton<IViberBotClient>(provider => new ViberBotClient(viberBotOptions.AuthenticationToken));
             
+            // 
+            services.AddSingleton<IViberBotFactory, ViberBotFactory>();
+
             //
             services.AddSingleton<IViberApiHttpService>(provider => new ViberApiHttpService(viberBotOptions.ViberApiEndpoint));
             
@@ -58,6 +62,7 @@ namespace ViberBot
             // 
             services.AddTransient<IPeopleRepository>(provider => new PeopleRepository(connectionString));
 
+            // 
             services.AddTransient<IViberBotRepository>(provider => new ViberBotRepository(connectionString));
 
             // 
