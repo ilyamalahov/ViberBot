@@ -99,7 +99,7 @@ namespace ViberBot.Controllers
             var botSetting = await viberBotRepository.GetById(botId);
 
             // 
-            await sendMessageService.SendStartedMenuAsync(botId, contact.InfoTextId, botSetting.InvitationMessage);
+            await sendMessageService.SendStartedMenuAsync(botId, contact.InfoTextId, null);
         }
 
         [HttpGet]

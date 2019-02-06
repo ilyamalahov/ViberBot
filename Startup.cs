@@ -50,9 +50,6 @@ namespace ViberBot
             //
             services.AddSingleton<IWebApiHttpService>(provider => new WebApiHttpService(viberBotOptions.WebApiEndpoint));
 
-            //
-            services.AddSingleton<IStateMachineService, InMemoryStateMachineService>();
-
             // 
             services.AddTransient<IBotService, ViberBotService>();
 
@@ -67,6 +64,10 @@ namespace ViberBot
 
             // 
             services.AddTransient<IViberBotRepository>(provider => new ViberBotRepository(connectionString));
+
+            // WebApiService
+            //
+            services.AddSingleton<IStateMachineService, InMemoryStateMachineService>();
 
             // 
             services.AddMvcCore();

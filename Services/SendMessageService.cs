@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
@@ -8,6 +9,7 @@ using Viber.Bot.Enums;
 using Viber.Bot.Messages;
 using Viber.Bot.Models;
 using ViberBot.Factories;
+using ViberBot.Models;
 
 namespace ViberBot.Services
 {
@@ -44,27 +46,34 @@ namespace ViberBot.Services
             await SendKeyboardMessage(botid, receiverId, messageText, buttons);
         }
 
-        public async Task SendStartedMenuAsync(int botId, string receiverId, string xmlContent)
+        public async Task SendStartedMenuAsync(int botId, string receiverId, Message message)
         {
             var viberBotClient = await viberBotFactory.GetClient(botId);
 
-            Carousel carousel = null;
-
-            using (var reader = new StringReader(xmlContent))
+            var buttons = message.Buttons.Select(button => new KeyboardButton
             {
-                var serializer = new XmlSerializer(typeof(Carousel));
+                Text = button.Title,
+                ActionBody = button.Id.ToString(),
+                Columns = button.Columns,
+                Rows = button.Rows,
+                BackgroundColor = button.Style?.BackgroundColor,
+                TextHorizontalAlign = (TextHorizontalAlign)button.Style?.TextHorizontalAlign,
+                TextVerticalAlign = (TextVerticalAlign)button.Style?.TextVerticalAlign,
+                TextSize = (TextSize)button.Style?.TextSize
+            });
 
-                carousel = (Carousel)serializer.Deserialize(reader);
-            }
-
-            var message = new CarouselMessage
+            var carouselMessage = new CarouselMessage
             {
                 Receiver = receiverId,
-                MinApiVersion = 2,
-                CarouselContent = carousel
+                MinApiVersion = 4,
+                CarouselContent = new Carousel
+                {
+                    AlternateText = message.Text,
+                    Buttons = buttons.ToList()
+                }
             };
 
-            await viberBotClient.SendCarouselMessageAsync(message);
+            await viberBotClient.SendCarouselMessageAsync(carouselMessage);
         }
 
         public async Task SendContainerAreasMenuAsync(string receiverId)
@@ -104,7 +113,7 @@ namespace ViberBot.Services
     public interface ISendMessageService
     {
         Task SendSubscribeMenuAsync(int botId, string receiverId);
-        Task SendStartedMenuAsync(int botId, string receiverId, string xmlContent);
+        Task SendStartedMenuAsync(int botId, string receiverId, Message message);
         Task SendContainerAreasMenuAsync(string receiverId);
         Task SendFixationMenuAsync(string receiverId);
         Task SendMessageAsync(string receiverId, string messageText);

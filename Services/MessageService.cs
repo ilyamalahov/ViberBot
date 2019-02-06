@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using Viber.Bot.Models;
 using Viber.Bot.Messages;
 using Viber.Bot.Enums;
+using System.Linq;
+using System.Collections;
 
 namespace ViberBot.Services
 {
@@ -32,24 +34,17 @@ namespace ViberBot.Services
 
             var contact = await peopleRepository.GetContactByPeopleId(agentId);
 
-            var buttons = new List<KeyboardButton>();
-
-            foreach (var button in message.Buttons)
+            var buttons = message.Buttons.Select(button => new KeyboardButton
             {
-                var keyboardButton = new KeyboardButton
-                {
-                    Text = button.Title,
-                    ActionBody = button.Id.ToString(),
-
-                    // Button style
-                    BackgroundColor = button.Style?.BackgroundColor,
-                    TextHorizontalAlign = (TextHorizontalAlign)button.Style?.TextHorizontalAlign,
-                    TextVerticalAlign = (TextVerticalAlign)button.Style?.TextVerticalAlign,
-                    TextSize = (TextSize)button.Style?.TextSize
-                };
-
-                buttons.Add(keyboardButton);
-            }
+                Text = button.Title,
+                ActionBody = button.Id.ToString(),
+                Columns = button.Columns,
+                Rows = button.Rows,
+                BackgroundColor = button.Style?.BackgroundColor,
+                TextHorizontalAlign = (TextHorizontalAlign)button.Style?.TextHorizontalAlign,
+                TextVerticalAlign = (TextVerticalAlign)button.Style?.TextVerticalAlign,
+                TextSize = (TextSize)button.Style?.TextSize
+            });
 
             var carouselMessage = new CarouselMessage
             {
@@ -58,7 +53,7 @@ namespace ViberBot.Services
                 CarouselContent = new Carousel
                 {
                     AlternateText = message.Text,
-                    Buttons = buttons
+                    Buttons = buttons.ToArray()
                 }
             };
 

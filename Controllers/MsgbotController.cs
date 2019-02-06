@@ -20,12 +20,19 @@ namespace ViberBot.Controllers
     public class MsgbotController: ControllerBase
     {
         private readonly IMessageService messageService;
+        private readonly IViberBotFactory viberBotFactory;
+        private readonly IPeopleRepository peopleRepository;
 
         // private readonly IHttpClientService viberApiHttpService;
 
-        public MsgbotController(IMessageService messageService)
+        public MsgbotController(
+            IMessageService messageService,
+            IViberBotFactory viberBotFactory,
+            IPeopleRepository peopleRepository)
         {
             this.messageService = messageService;
+            this.viberBotFactory = viberBotFactory;
+            this.peopleRepository = peopleRepository;
             // this.viberApiHttpService = viberApiHttpService;
         }
 
@@ -59,6 +66,10 @@ namespace ViberBot.Controllers
 
                 message = (Message)serializer.Deserialize(xmlReader);   
             }
+
+            var viberBotClient = viberBotFactory.GetClient(botId);
+
+            var contact = await peopleRepository.GetContactByPeopleId(agentId);
 
             switch (message.ButtonPlace)
             {

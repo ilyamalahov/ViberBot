@@ -12,5 +12,11 @@ namespace ViberBot.Models
 
         [XmlElement("style")]
         public ButtonStyle Style { get; set; }
+
+        [XmlElement("columns")]
+        public int? Columns { get; set; }
+
+        [XmlElement("rows")]
+        public int? Rows { get; set; }
     }
 }

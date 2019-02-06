@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Xml.Serialization;
 
 namespace ViberBot.Models
@@ -20,7 +21,7 @@ namespace ViberBot.Models
 
         [XmlArray("buttonlist")]
         [XmlArrayItem("button")]
-        public Button[] Buttons { get; }
+        public Collection<Button> Buttons { get; set; }
     }
 
     public enum Size
