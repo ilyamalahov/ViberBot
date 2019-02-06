@@ -89,23 +89,23 @@ namespace ViberBot.Controllers
             }
         }
 
-        [HttpGet("start")]
+        [HttpGet]
         public async Task Start(int botId, Guid agentId)
         {
             //
-            var contact = await peopleRepository.GetContactById(agentId);
+            var contact = await peopleRepository.GetContactByPeopleId(agentId);
 
             //
             var botSetting = await viberBotRepository.GetById(botId);
 
             // 
-            var textAttribute = botSetting.InvitationMessage.Attributes().First(attr => attr.Name == "text");
+            await sendMessageService.SendStartedMenuAsync(botId, contact.InfoTextId, botSetting.InvitationMessage);
+        }
 
-            // 
-            var imageAttribute = botSetting.InvitationMessage.Attributes().First(attr => attr.Name == "img");
-
-            // 
-            await sendMessageService.SendStartedMenuAsync(botId, contact.InfoTextId, textAttribute.Value, imageAttribute.Value);
+        [HttpGet]
+        public async Task Out(int botId, Guid agentId)
+        {
+            
         }
     }
 }

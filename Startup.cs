@@ -55,6 +55,9 @@ namespace ViberBot
 
             // 
             services.AddTransient<IBotService, ViberBotService>();
+
+            // 
+            services.AddTransient<IMessageService, MessageService>();
             
             // 
             services.AddTransient<ISendMessageService, SendMessageService>();

@@ -10,6 +10,6 @@ namespace ViberBot.Entities
         public int OrganizationId { get; set; }
         public string AppKey { get; set; }
         public string ViberIncomeHost { get; set; }
-        public XElement InvitationMessage { get; set; }
+        public string InvitationMessage { get; set; }
     }
 }

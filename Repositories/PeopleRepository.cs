@@ -134,7 +134,7 @@ namespace ViberBot.Repositories
             }
         }
 
-        public async Task<PeopleContact> GetContactById(Guid agentId)
+        public async Task<PeopleContact> GetContactByPeopleId(Guid agentId)
         {
             var peopleSelectSql = @"SELECT pc.*
                                     FROM dbo.PeopleContact pc
@@ -154,7 +154,7 @@ namespace ViberBot.Repositories
         Task<People> GetPeopleByIdAsync(string userId);
         Task<People> GetOrAddPeopleAsync(string userId, string userName, string userAvatarUrl);
         Task UpdateContactServiceStateAsync(string userId, ServiceState state);
-        Task<PeopleContact> GetContactById(Guid agentId);
+        Task<PeopleContact> GetContactByPeopleId(Guid agentId);
     }
 }
 
