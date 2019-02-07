@@ -1,22 +1,24 @@
+using System.Runtime.Serialization;
 using System.Xml.Serialization;
 
 namespace ViberBot.Models
 {
+    [DataContract(Name = "style", Namespace = "")]
     public class ButtonStyle
     {
-        [XmlElement("bgColor")]
+        [DataMember(Name = "bgColor")]
         public string BackgroundColor { get; set; }
 
-        [XmlElement("textVerticalAlign")]
+        [DataMember(Name = "textVerticalAlign")]
         public VerticalAlign? TextVerticalAlign { get; set; }
         
-        [XmlElement("textHorizontalAlign")]
+        [DataMember(Name = "textHorizontalAlign")]
         public HorizontalAlign? TextHorizontalAlign { get; set; }
 
-        [XmlElement("textOpacity")]
+        [DataMember(Name = "textOpacity")]
         public int? TextOpacity { get; set; }
 
-        [XmlElement("textSize")]
+        [DataMember(Name = "textSize")]
         public Size? TextSize { get; set; }
     }
 }

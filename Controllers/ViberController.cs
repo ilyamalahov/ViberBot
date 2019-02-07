@@ -14,32 +14,26 @@ using Viber.Bot.Models;
 using ViberBot.Factories;
 using ViberBot.Repositories;
 using ViberBot.Services;
+using ViberBot.Services.Bot;
 
 namespace ViberBot.Controllers
 {
     [Route("api/[controller]")]
     public class ViberController : ControllerBase
     {
-        private readonly IViberBotFactory viberBotFactory;
+        private readonly IViberBotClient viberBotClient;
         private readonly IBotService botService;
-        private readonly ISendMessageService sendMessageService;
-        private readonly IPeopleRepository peopleRepository;
-        private readonly IViberBotRepository viberBotRepository;
         private readonly ILogger<ViberController> logger;
 
         public ViberController(
-            IViberBotFactory viberBotFactory,
+            IBotFactory<IViberBotClient> viberBotFactory,
             IBotService botService,
-            ISendMessageService sendMessageService,
-            IPeopleRepository peopleRepository,
-            IViberBotRepository viberBotRepository,
             ILogger<ViberController> logger)
         {
-            this.viberBotFactory = viberBotFactory;
+            var botId = 1;
+
+            this.viberBotClient = viberBotFactory.GetClient(botId);
             this.botService = botService;
-            this.sendMessageService = sendMessageService;
-            this.peopleRepository = peopleRepository;
-            this.viberBotRepository = viberBotRepository;
             this.logger = logger;
         }
 
@@ -48,7 +42,7 @@ namespace ViberBot.Controllers
         {
             try
             {
-                var viberBotClient = await viberBotFactory.GetClient(botId);
+                // var viberBotClient = await viberBotFactory.GetClient(botId);
 
                 var body = await new StreamReader(Request.Body).ReadToEndAsync();
 
@@ -87,19 +81,6 @@ namespace ViberBot.Controllers
             {
                 logger.LogError(ex, "Error: {ex.Message}", ex.Message);
             }
-        }
-
-        [HttpGet]
-        public async Task Start(int botId, Guid agentId)
-        {
-            //
-            var contact = await peopleRepository.GetContactByPeopleId(agentId);
-
-            //
-            var botSetting = await viberBotRepository.GetById(botId);
-
-            // 
-            // await sendMessageService.SendStartedMenuAsync(botId, contact.InfoTextId, null);
         }
     }
 }

@@ -6,33 +6,23 @@ using ViberBot.Repositories;
 
 namespace ViberBot.Factories
 {
-    public class ViberBotFactory : IViberBotFactory
+    public class ViberBotFactory : IBotFactory<IViberBotClient>
     {
-        private readonly IViberBotRepository viberBotRepository;
+        private readonly IBotRepository botRepository;
         private Dictionary<int, IViberBotClient> botClients;
 
-        public ViberBotFactory(IViberBotRepository viberBotRepository)
+        public ViberBotFactory(IBotRepository botRepository)
         {
-            this.viberBotRepository = viberBotRepository;
+            this.botRepository = botRepository;
 
             botClients = new Dictionary<int, IViberBotClient>();
         }
 
-        // private async Task InitializeBotClients(IViberBotRepository viberBotRepository)
-        // {
-        //     var botSettings = await viberBotRepository.GetAll();
-
-        //     foreach (var botSetting in botSettings)
-        //     {
-        //         botClients.Add(botSetting.Id, new ViberBotClient(botSetting.AppKey));
-        //     }
-        // }
-
-        public async Task<IViberBotClient> GetClient(int botId)
+        public IViberBotClient GetClient(int botId)
         {
             if(!botClients.ContainsKey(botId))
             {
-                var addResult = await AddClient(botId);
+                var addResult = AddClient(botId);
 
                 if(!addResult)
                 {
@@ -43,31 +33,31 @@ namespace ViberBot.Factories
             return botClients.GetValueOrDefault(botId);
         }
 
-        public async Task<bool> AddClient(int botId)
+        public bool AddClient(int botId)
         {
             if(botId == 0)
             {
                 throw new ArgumentNullException(nameof(botId));
             }
 
-            var botSetting = await viberBotRepository.GetById(botId);
+            var bot = botRepository.GetById(botId).Result;
 
-            if(botSetting == null)
+            if(bot == null)
             {
                 return false;
             }
 
             lock (botClients)
             {
-                return botClients.TryAdd(botId, new ViberBotClient(botSetting.AppKey));
+                return botClients.TryAdd(botId, new ViberBotClient(bot.AppKey));
             }
         }
     }
 
-    public interface IViberBotFactory
+    public interface IBotFactory<T> where T : IViberBotClient
     {
-        Task<IViberBotClient> GetClient(int botId);
+        T GetClient(int botId);
 
-        Task<bool> AddClient(int botId);
+        bool AddClient(int botId);
     }
 }

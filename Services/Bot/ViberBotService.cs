@@ -14,7 +14,7 @@ using ViberBot.Models;
 using ViberBot.Repositories;
 using ViberBot.Services.Http;
 
-namespace ViberBot.Services
+namespace ViberBot.Services.Bot
 {
     public class ViberBotService : IBotService
     {
@@ -38,33 +38,26 @@ namespace ViberBot.Services
 
         public async Task ReceiveMessage(int botId, string senderId, MessageBase message)
         {
-            // if (messageText == "OK")
-            // {
-            //     await Subscribed(botId, senderId);
-
-            //     return;
-            // }
+            InMessage inMessage = null;
 
             // 
             var people = await peopleRepository.GetPeopleByViberIdAsync(senderId);
 
-            var inMessage = new InMessage();
-
             switch (message.Type)
             {
                 case Viber.Bot.Enums.MessageType.Picture:
-                    inMessage.Picture = (message as PictureMessage).Media;
+                    inMessage = CreateInPictureMessage((PictureMessage)message);
                     break;
                 case Viber.Bot.Enums.MessageType.Video:
-                    inMessage.Video = (message as VideoMessage).Media;
+                    inMessage = CreateInVideoMessage((VideoMessage)message);
                     break;
                 case Viber.Bot.Enums.MessageType.Text:
-                    inMessage.Text = (message as TextMessage).Text;
+                    inMessage = CreateInTextMessage((TextMessage)message);
                     break;
             }
 
             // 
-            var payload = new MessageModel<InMessage>
+            var model = new MessageModel<InMessage>
             {
                 BotId = botId,
                 AgentId = people.Id,
@@ -72,7 +65,31 @@ namespace ViberBot.Services
             };
 
             // 
-            await viberApiHttpService.SendPostAsync("msgbot/in", payload);
+            await viberApiHttpService.SendPostAsync("msgbot/in", model);
+        }
+
+        private InMessage CreateInTextMessage(TextMessage message)
+        {
+            return new InMessage
+            {
+                Text = message.Text
+            };
+        }
+
+        private InMessage CreateInVideoMessage(VideoMessage message)
+        {
+            return new InMessage
+            {
+                Video = message.Media
+            };
+        }
+
+        private InMessage CreateInPictureMessage(PictureMessage message)
+        {
+            return new InMessage
+            {
+                Picture = message.Media
+            };
         }
 
         public async Task ConversationStarted(int botId, string userId, string userName, string userAvatarUrl)
@@ -82,8 +99,23 @@ namespace ViberBot.Services
                 // 
                 var people = await peopleRepository.GetOrAddPeopleAsync(userId, userName, userAvatarUrl);
 
-                // 
-                // await sendMessageService.SendSubscribeMenuAsync(botId, userId);
+                var outMessage = new OutMessage
+                {
+                    Text = "Нажмите \"OK\", чтобы продолжить",
+                    ButtonPlace = PlaceType.Window,
+                    Buttons = new Button[]
+                    {
+                        new Button
+                        {
+                            Columns = 6,
+                            Rows = 2,
+                            Title = "OK",
+                            Id = 1
+                        }
+                    }
+                };
+
+                await viberApiHttpService.SendPostAsync("msgbot/out", outMessage);
 
                 // 
                 await SendChangedState(botId, people.Id, ServiceState.ConversationStarted);

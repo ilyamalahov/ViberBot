@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using Viber.Bot.Messages;
 using Viber.Bot.Models;
 
-namespace ViberBot.Services
+namespace ViberBot.Services.Bot
 {
     public interface IBotService
     {

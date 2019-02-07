@@ -17,14 +17,16 @@ namespace ViberBot.Services
 {
     public class SendMessageService : ISendMessageService
     {
-        private readonly IViberBotFactory viberBotFactory;
+        private readonly IBotFactory<IViberBotClient> viberBotFactory;
 
-        // private readonly IViberBotClient viberBotClient;
+        private readonly IViberBotClient viberBotClient;
 
-        public SendMessageService(IViberBotFactory viberBotFactory)
+        public SendMessageService(IBotFactory<IViberBotClient> viberBotFactory)
         {
-            // this.viberBotClient = viberBotClient;
-            this.viberBotFactory = viberBotFactory;
+            var botId = 1;
+
+            this.viberBotClient = viberBotFactory.GetClient(botId);
+            // this.viberBotFactory = viberBotFactory;
         }
 
         // public async Task SendSubscribeMenuAsync(int botid, string receiverId)
@@ -54,7 +56,7 @@ namespace ViberBot.Services
             if(message.Text == null) throw new ArgumentNullException("text");
 
             // Obsolete
-            var viberBotClient = await viberBotFactory.GetClient(botId);
+            // var viberBotClient = viberBotFactory.GetClient(botId);
 
             // 
             var textMessage = new TextMessage
@@ -73,7 +75,7 @@ namespace ViberBot.Services
             if(message.Picture == null) throw new ArgumentNullException("picture");
 
             // Obsolete
-            var viberBotClient = await viberBotFactory.GetClient(botId);
+            // var viberBotClient = await viberBotFactory.GetClient(botId);
 
             // 
             var pictureMessage = new PictureMessage
@@ -92,7 +94,7 @@ namespace ViberBot.Services
             if(message.Location == null) throw new ArgumentNullException("location");
 
             // Obsolete
-            var viberBotClient = await viberBotFactory.GetClient(botId);
+            // var viberBotClient = await viberBotFactory.GetClient(botId);
 
             // 
             var locationMessage = new LocationMessage
@@ -113,7 +115,7 @@ namespace ViberBot.Services
         public async Task SendRichMediaMessageAsync(int botId, string receiverId, OutMessage message)
         {
             // Obsolete
-            var viberBotClient = await viberBotFactory.GetClient(botId);
+            // var viberBotClient = await viberBotFactory.GetClient(botId);
 
             // 
             var buttons = message.Buttons.Select(button => {
@@ -156,7 +158,7 @@ namespace ViberBot.Services
         public async Task SendKeyboardMessageAsync(int botId, string receiverId, OutMessage message)
         {
             // Obsolete
-            var viberBotClient = await viberBotFactory.GetClient(botId);
+            // var viberBotClient = await viberBotFactory.GetClient(botId);
 
             // 
             var buttons = message.Buttons.Select(button => {

@@ -1,22 +1,24 @@
+using System.Runtime.Serialization;
 using System.Xml.Serialization;
 
 namespace ViberBot.Models
 {
+    [DataContract(Name = "button", Namespace = "")]
     public class Button
     {
-        [XmlElement("id")]
+        [DataMember(Name = "id")]
         public int Id { get; set; }
 
-        [XmlElement("title")]
+        [DataMember(Name = "title")]
         public string Title { get; set; }
 
-        [XmlElement("style")]
+        [DataMember(Name = "style")]
         public ButtonStyle Style { get; set; }
 
-        [XmlElement("columns")]
+        [DataMember(Name = "columns")]
         public int? Columns { get; set; }
 
-        [XmlElement("rows")]
+        [DataMember(Name = "rows")]
         public int? Rows { get; set; }
     }
 }

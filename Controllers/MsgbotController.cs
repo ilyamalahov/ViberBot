@@ -33,8 +33,8 @@ namespace ViberBot.Controllers
             this.sendMessageService = sendMessageService;
         }
 
-        [HttpGet("change_state")]
-        public async Task ChangeState(int botId, Guid agentId, string service, int newStateId)
+        [HttpPost("change_state")]
+        public IActionResult ChangeState(int botId, Guid agentId, string service, int newStateId)
         {
             // var serviceState = (ServiceState)newStateId;
 
@@ -44,10 +44,12 @@ namespace ViberBot.Controllers
                 
             //     await stateContext.Start(botId, agentId);
             // }
+
+            return Ok();
         }
         
         [HttpPost("in")]
-        public async Task<IActionResult> In([FromBody] MessageModel<InMessage> model)
+        public IActionResult In([FromBody] MessageModel<InMessage> model)
         {
             if (!ModelState.IsValid)
             { 
@@ -60,8 +62,13 @@ namespace ViberBot.Controllers
         }
 
         [HttpPost("out")]
-        public async Task Out([FromBody] MessageModel<OutMessage> model)
+        public async Task<IActionResult> Out([FromBody] MessageModel<OutMessage> model)
         {
+            if (!ModelState.IsValid)
+            { 
+                return BadRequest(ModelState);
+            }
+
             var contact = await peopleRepository.GetContactByPeopleId(model.AgentId);
 
             switch (model.Message.DetermineMessageType())
@@ -82,6 +89,8 @@ namespace ViberBot.Controllers
                     await sendMessageService.SendKeyboardMessageAsync(model.BotId, contact.InfoTextId, model.Message);
                     break;
             }
+
+            return Ok();
         }
     }
 }
