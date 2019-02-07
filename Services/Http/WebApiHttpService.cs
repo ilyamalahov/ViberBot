@@ -1,5 +1,6 @@
 using System;
 using System.Net.Http;
+using System.Net.Http.Formatting;
 using System.Threading.Tasks;
 using ViberBot.Extensions;
 
@@ -30,9 +31,18 @@ namespace ViberBot.Services.Http
             return httpClient.GetAsync(url);
         }
 
-        public Task<HttpResponseMessage> SendPostAsync(string url, object parametersObj = null)
+        public async Task<HttpResponseMessage> SendPostAsync<T>(string url, T parametersObj = default(T), string mediaType = "application/xml")
         {
-            throw new System.NotImplementedException();
+            MediaTypeFormatter formatter = null;
+
+            switch (mediaType)
+            {
+                case "application/xml":
+                    formatter = new XmlMediaTypeFormatter();
+                    break;
+            }
+
+            return await httpClient.PostAsync(url, parametersObj, formatter);
         }
     }
 

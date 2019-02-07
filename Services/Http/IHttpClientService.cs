@@ -24,6 +24,6 @@ namespace ViberBot.Services.Http
         /// <param name="url">Адрес конечной точки (Endpoint)</param>
         /// <param name="parameters">Дополнительные параметры</param>
         /// <returns>Сообщение ответа HTTP</returns>
-        Task<HttpResponseMessage> SendPostAsync(string url, object parametersObj = null);
+        Task<HttpResponseMessage> SendPostAsync<T>(string url, T parametersObj = default(T), string mediaType = "application/xml");
     }
 }

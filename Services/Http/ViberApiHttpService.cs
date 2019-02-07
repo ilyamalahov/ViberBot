@@ -1,5 +1,6 @@
 using System;
 using System.Net.Http;
+using System.Net.Http.Formatting;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -44,6 +45,20 @@ namespace ViberBot.Services.Http
             request.Content = new StringContent(jsonParameters, Encoding.UTF8, "application/json");
 
             return await SendAsync(request);
+        }
+
+        public async Task<HttpResponseMessage> SendPostAsync<T>(string url, T parametersObj = default(T), string mediaType = "application/xml")
+        {
+            MediaTypeFormatter formatter = null;
+
+            switch (mediaType)
+            {
+                case "application/xml":
+                    formatter = new XmlMediaTypeFormatter();
+                    break;
+            }
+
+            return await httpClient.PostAsync(url, parametersObj, formatter);
         }
 
         public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)

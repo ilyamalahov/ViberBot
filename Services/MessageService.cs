@@ -28,7 +28,7 @@ namespace ViberBot.Services
             this.viberBotFactory = viberBotFactory;
         }
 
-        public async Task SendCarouselMessage(int botId, Guid agentId, Message message)
+        public async Task SendCarouselMessage(int botId, Guid agentId, OutMessage message)
         {
             var viberBotClient = await viberBotFactory.GetClient(botId);
 
@@ -60,12 +60,12 @@ namespace ViberBot.Services
             await viberBotClient.SendCarouselMessageAsync(carouselMessage);
         }
 
-        public Task SendKeyboardMessage(int botId, Guid agentId, Message message)
+        public Task SendKeyboardMessage(int botId, Guid agentId, OutMessage message)
         {
             throw new NotImplementedException();
         }
 
-        public Task SendMessage(int botId, Guid agentId, Message message)
+        public Task SendMessage(int botId, Guid agentId, OutMessage message)
         {
             throw new NotImplementedException();
         }
@@ -73,8 +73,8 @@ namespace ViberBot.Services
 
     public interface IMessageService
     {
-        Task SendCarouselMessage(int botId, Guid agentId, Message message);
-        Task SendKeyboardMessage(int botId, Guid agentId, Message message);
-        Task SendMessage(int botId, Guid agentId, Message message);
+        Task SendCarouselMessage(int botId, Guid agentId, OutMessage message);
+        Task SendKeyboardMessage(int botId, Guid agentId, OutMessage message);
+        Task SendMessage(int botId, Guid agentId, OutMessage message);
     }
 }

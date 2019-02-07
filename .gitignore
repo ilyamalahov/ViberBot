@@ -262,3 +262,5 @@ __pycache__/
 
 # Assets folder
 assets
+
+appsettings.Development.json

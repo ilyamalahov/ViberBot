@@ -33,47 +33,47 @@ namespace ViberBot.Middlewares
 
         public async Task InvokeAsync(HttpContext context)
         {
-            try
-            {
-                var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
+            // try
+            // {
+            //     var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
 
-                var signatureHeader = context.Request.Headers[ViberBotClient.XViberContentSignatureHeader];
+            //     var signatureHeader = context.Request.Headers[ViberBotClient.XViberContentSignatureHeader];
 
-                var isSignatureValid = viberBotClient.ValidateWebhookHash(signatureHeader, body);
+            //     var isSignatureValid = viberBotClient.ValidateWebhookHash(signatureHeader, body);
 
-                if (!isSignatureValid)
-                {
-                    throw new InvalidOperationException("Invalid signature");
-                }
+            //     if (!isSignatureValid)
+            //     {
+            //         throw new InvalidOperationException("Invalid signature");
+            //     }
 
-                // Deserialize JSON callback data
-                var callbackData = JsonConvert.DeserializeObject<CallbackData>(body);
+            //     // Deserialize JSON callback data
+            //     var callbackData = JsonConvert.DeserializeObject<CallbackData>(body);
 
-                // 
-                var user = callbackData.User;
+            //     // 
+            //     var user = callbackData.User;
 
-                switch (callbackData.Event)
-                {
-                    case EventType.Subscribed:
-                        await viberBotService.Subscribed(0, user.Id);
-                        break;
-                    case EventType.Unsubscribed:
-                        await viberBotService.UnSubscribed(0, callbackData.UserId);
-                        break;
-                    case EventType.ConversationStarted:
-                        await viberBotService.ConversationStarted(0, user.Id, user.Name, user.Avatar);
-                        break;
-                    case EventType.Message:
-                        await viberBotService.ReceiveMessage(0, callbackData.Sender.Id, (callbackData.Message as TextMessage).Text);
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Error: {ex.Message}", ex.Message);
+            //     switch (callbackData.Event)
+            //     {
+            //         case EventType.Subscribed:
+            //             await viberBotService.Subscribed(0, user.Id);
+            //             break;
+            //         case EventType.Unsubscribed:
+            //             await viberBotService.UnSubscribed(0, callbackData.UserId);
+            //             break;
+            //         case EventType.ConversationStarted:
+            //             await viberBotService.ConversationStarted(0, user.Id, user.Name, user.Avatar);
+            //             break;
+            //         case EventType.Message:
+            //             await viberBotService.ReceiveMessage(0, callbackData.Sender.Id, (callbackData.Message as TextMessage).Text);
+            //             break;
+            //     }
+            // }
+            // catch (Exception ex)
+            // {
+            //     logger.LogError(ex, "Error: {ex.Message}", ex.Message);
 
-                await next.Invoke(context);
-            }
+            //     await next.Invoke(context);
+            // }
         }
     }
 }

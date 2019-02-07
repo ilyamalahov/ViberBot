@@ -19,43 +19,60 @@ namespace ViberBot.Services
     public class ViberBotService : IBotService
     {
         private readonly ISendMessageService sendMessageService;
-        private readonly IWebApiHttpService httpClientService;
+        private readonly IViberApiHttpService viberApiHttpService;
         private readonly IPeopleRepository peopleRepository;
         private readonly ILogger<ViberBotService> logger;
 
         public ViberBotService(
             ISendMessageService sendMessageService,
-            IWebApiHttpService httpClientService,
+            IViberApiHttpService viberApiHttpService,
             IPeopleRepository peopleRepository,
             ILogger<ViberBotService> logger
             )
         {
             this.sendMessageService = sendMessageService;
-            this.httpClientService = httpClientService;
+            this.viberApiHttpService = viberApiHttpService;
             this.peopleRepository = peopleRepository;
             this.logger = logger;
         }
 
-        public async Task ReceiveMessage(int botId, string senderId, string messageText)
+        public async Task ReceiveMessage(int botId, string senderId, MessageBase message)
         {
-            try
+            // if (messageText == "OK")
+            // {
+            //     await Subscribed(botId, senderId);
+
+            //     return;
+            // }
+
+            // 
+            var people = await peopleRepository.GetPeopleByViberIdAsync(senderId);
+
+            var inMessage = new InMessage();
+
+            switch (message.Type)
             {
-                if (messageText == "OK")
-                {
-                    await Subscribed(botId, senderId);
-
-                    return;
-                }
-
-                // 
-                var people = await peopleRepository.GetPeopleByIdAsync(senderId);
-
-                await SendMessage(botId, people.Id, MessageType.Text);
+                case Viber.Bot.Enums.MessageType.Picture:
+                    inMessage.Picture = (message as PictureMessage).Media;
+                    break;
+                case Viber.Bot.Enums.MessageType.Video:
+                    inMessage.Video = (message as VideoMessage).Media;
+                    break;
+                case Viber.Bot.Enums.MessageType.Text:
+                    inMessage.Text = (message as TextMessage).Text;
+                    break;
             }
-            catch (Exception)
+
+            // 
+            var payload = new MessageModel<InMessage>
             {
-                throw;
-            }
+                BotId = botId,
+                AgentId = people.Id,
+                Message = inMessage
+            };
+
+            // 
+            await viberApiHttpService.SendPostAsync("msgbot/in", payload);
         }
 
         public async Task ConversationStarted(int botId, string userId, string userName, string userAvatarUrl)
@@ -66,7 +83,7 @@ namespace ViberBot.Services
                 var people = await peopleRepository.GetOrAddPeopleAsync(userId, userName, userAvatarUrl);
 
                 // 
-                await sendMessageService.SendSubscribeMenuAsync(botId, userId);
+                // await sendMessageService.SendSubscribeMenuAsync(botId, userId);
 
                 // 
                 await SendChangedState(botId, people.Id, ServiceState.ConversationStarted);
@@ -85,7 +102,7 @@ namespace ViberBot.Services
                 await peopleRepository.UpdateContactServiceStateAsync(userId, ServiceState.Subscribed);
 
                 // 
-                var people = await peopleRepository.GetPeopleByIdAsync(userId);
+                var people = await peopleRepository.GetPeopleByViberIdAsync(userId);
 
                 // 
                 await SendChangedState(botId, people.Id, ServiceState.Subscribed);
@@ -104,7 +121,7 @@ namespace ViberBot.Services
                 await peopleRepository.UpdateContactServiceStateAsync(userId, ServiceState.Unsubscribed);
 
                 // 
-                var people = await peopleRepository.GetPeopleByIdAsync(userId);
+                var people = await peopleRepository.GetPeopleByViberIdAsync(userId);
 
                 // 
                 await SendChangedState(botId, people.Id, ServiceState.Unsubscribed);
@@ -115,32 +132,17 @@ namespace ViberBot.Services
             }
         }
 
-        private async Task<HttpResponseMessage> SendMessage(int botId, Guid agentId, MessageType messageType)
-        {
-            // 
-            var parameters = new
-            {
-                service = "Viber",
-                botId,
-                agentId,
-                type = (int)messageType
-            };
-
-            return await httpClientService.SendGetAsync("in", parameters);
-        }
-
         private async Task<HttpResponseMessage> SendChangedState(int botId, Guid agentId, ServiceState newState)
         {
             // 
             var parameters = new
             {
-                service = "Viber",
                 botId,
                 agentId,
-                newStateId = (int)newState
+                stateId = (int)newState
             };
 
-            return await httpClientService.SendGetAsync("change_state", parameters);
+            return await viberApiHttpService.SendGetAsync("msgbot/change_state", parameters);
         }
     }
 }

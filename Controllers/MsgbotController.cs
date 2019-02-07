@@ -2,12 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Net.Http;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Viber.Bot.Messages;
 using Viber.Bot.Models;
+using ViberBot.Extensions;
 using ViberBot.Factories;
 using ViberBot.Models;
 using ViberBot.Repositories;
@@ -19,21 +22,15 @@ namespace ViberBot.Controllers
     [Route("api/[controller]")]
     public class MsgbotController: ControllerBase
     {
-        private readonly IMessageService messageService;
-        private readonly IViberBotFactory viberBotFactory;
+        private readonly ISendMessageService sendMessageService;
         private readonly IPeopleRepository peopleRepository;
 
-        // private readonly IHttpClientService viberApiHttpService;
-
         public MsgbotController(
-            IMessageService messageService,
-            IViberBotFactory viberBotFactory,
-            IPeopleRepository peopleRepository)
+            IPeopleRepository peopleRepository,
+            ISendMessageService sendMessageService)
         {
-            this.messageService = messageService;
-            this.viberBotFactory = viberBotFactory;
             this.peopleRepository = peopleRepository;
-            // this.viberApiHttpService = viberApiHttpService;
+            this.sendMessageService = sendMessageService;
         }
 
         [HttpGet("change_state")]
@@ -49,38 +46,40 @@ namespace ViberBot.Controllers
             // }
         }
         
-        [HttpGet("in")]
-        public async Task In(int botId, Guid agentId)
+        [HttpPost("in")]
+        public async Task<IActionResult> In([FromBody] MessageModel<InMessage> model)
         {
-            
+            if (!ModelState.IsValid)
+            { 
+                return BadRequest(ModelState);
+            }
+
+            var messageType = model.Message.DetermineMessageType();
+
+            return Ok(messageType);
         }
 
         [HttpPost("out")]
-        public async Task Out(int botId, Guid agentId)
+        public async Task Out([FromBody] MessageModel<OutMessage> model)
         {
-            Message message = null;
+            var contact = await peopleRepository.GetContactByPeopleId(model.AgentId);
 
-            using (var xmlReader = XmlReader.Create(Request.Body))
+            switch (model.Message.DetermineMessageType())
             {
-                var serializer = new XmlSerializer(typeof(Message));
-
-                message = (Message)serializer.Deserialize(xmlReader);   
-            }
-
-            var viberBotClient = viberBotFactory.GetClient(botId);
-
-            var contact = await peopleRepository.GetContactByPeopleId(agentId);
-
-            switch (message.ButtonPlace)
-            {
-                case PlaceType.Message:
-                    await messageService.SendCarouselMessage(botId, agentId, message);
+                case MessageType.Text:
+                    await sendMessageService.SendTextMessageAsync(model.BotId, contact.InfoTextId, model.Message);
                     break;
-                case PlaceType.Window:
-                    await messageService.SendKeyboardMessage(botId, agentId, message);
+                case MessageType.Picture:
+                    await sendMessageService.SendPictureMessageAsync(model.BotId, contact.InfoTextId, model.Message);
                     break;
-                case PlaceType.Undefined:
-                    await messageService.SendMessage(botId, agentId, message);
+                case MessageType.Location:
+                    await sendMessageService.SendLocationMessageAsync(model.BotId, contact.InfoTextId, model.Message);
+                    break;
+                case MessageType.RichMedia:
+                    await sendMessageService.SendRichMediaMessageAsync(model.BotId, contact.InfoTextId, model.Message);
+                    break;
+                case MessageType.Keyboard:
+                    await sendMessageService.SendKeyboardMessageAsync(model.BotId, contact.InfoTextId, model.Message);
                     break;
             }
         }

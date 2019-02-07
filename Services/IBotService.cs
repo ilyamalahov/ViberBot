@@ -6,7 +6,7 @@ namespace ViberBot.Services
 {
     public interface IBotService
     {
-        Task ReceiveMessage(int botId, string senderId, string messageText);
+        Task ReceiveMessage(int botId, string senderId, MessageBase message);
         Task Subscribed(int botId, string userId);
         Task UnSubscribed(int botId, string userId);
         Task ConversationStarted(int botId, string userId, string userName, string userAvatarUrl);

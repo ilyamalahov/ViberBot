@@ -4,14 +4,13 @@ using System.Xml.Serialization;
 
 namespace ViberBot.Models
 {
-    [XmlRoot("msg")]
-    public class Message
+    public class OutMessage
     {
         [XmlElement("text")]
         public string Text { get; set; }
         
         [XmlElement("pic")]
-        public string Image { get; set; }
+        public string Picture { get; set; }
         
         [XmlElement("location")]
         public Location Location { get; set; }

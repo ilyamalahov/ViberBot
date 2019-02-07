@@ -69,17 +69,17 @@ namespace ViberBot.Controllers
 
                 switch (callbackData.Event)
                 {
+                    case EventType.ConversationStarted:
+                        await botService.ConversationStarted(botId, user.Id, user.Name, user.Avatar);
+                        break;
                     case EventType.Subscribed:
                         await botService.Subscribed(botId, user.Id);
                         break;
                     case EventType.Unsubscribed:
                         await botService.UnSubscribed(botId, callbackData.UserId);
                         break;
-                    case EventType.ConversationStarted:
-                        await botService.ConversationStarted(botId, user.Id, user.Name, user.Avatar);
-                        break;
                     case EventType.Message:
-                        await botService.ReceiveMessage(botId, callbackData.Sender.Id, (callbackData.Message as TextMessage).Text);
+                        await botService.ReceiveMessage(botId, callbackData.Sender.Id, callbackData.Message);
                         break;
                 }
             }
@@ -99,13 +99,7 @@ namespace ViberBot.Controllers
             var botSetting = await viberBotRepository.GetById(botId);
 
             // 
-            await sendMessageService.SendStartedMenuAsync(botId, contact.InfoTextId, null);
-        }
-
-        [HttpGet]
-        public async Task Out(int botId, Guid agentId)
-        {
-            
+            // await sendMessageService.SendStartedMenuAsync(botId, contact.InfoTextId, null);
         }
     }
 }

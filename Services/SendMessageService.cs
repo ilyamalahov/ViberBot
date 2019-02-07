@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,6 +11,7 @@ using Viber.Bot.Messages;
 using Viber.Bot.Models;
 using ViberBot.Factories;
 using ViberBot.Models;
+using ViberBot.Extensions;
 
 namespace ViberBot.Services
 {
@@ -25,43 +27,116 @@ namespace ViberBot.Services
             this.viberBotFactory = viberBotFactory;
         }
 
-        public async Task SendSubscribeMenuAsync(int botid, string receiverId)
-        {
-            var messageText = "Нажмите кнопку \"OK\", чтобы продолжить";
+        // public async Task SendSubscribeMenuAsync(int botid, string receiverId)
+        // {
+        //     var messageText = "Нажмите кнопку \"OK\", чтобы продолжить";
 
-            // Keyboard buttons
-            var buttons = new[]
+        //     // Keyboard buttons
+        //     var buttons = new[]
+        //     {
+        //         new KeyboardButton
+        //         {
+        //             Columns = 6,
+        //             Rows = 1,
+        //             Text = "OK",
+        //             ActionType = KeyboardActionType.Reply,
+        //             ActionBody = "OK"
+        //         }
+        //     };
+
+        //     // Send keyboard message
+        //     await SendKeyboardMessage(botid, receiverId, messageText, buttons);
+        // }
+
+        public async Task SendTextMessageAsync(int botId, string receiverId, OutMessage message)
+        {
+            //
+            if(message.Text == null) throw new ArgumentNullException("text");
+
+            // Obsolete
+            var viberBotClient = await viberBotFactory.GetClient(botId);
+
+            // 
+            var textMessage = new TextMessage
             {
-                new KeyboardButton
+                Receiver = receiverId,
+                MinApiVersion = 4,
+                Text = message.Text
+            };
+
+            await viberBotClient.SendTextMessageAsync(textMessage);
+        }
+
+        public async Task SendPictureMessageAsync(int botId, string receiverId, OutMessage message)
+        {
+            //
+            if(message.Picture == null) throw new ArgumentNullException("picture");
+
+            // Obsolete
+            var viberBotClient = await viberBotFactory.GetClient(botId);
+
+            // 
+            var pictureMessage = new PictureMessage
+            {
+                Receiver = receiverId,
+                MinApiVersion = 4,
+                Media = message.Picture
+            };
+
+            await viberBotClient.SendPictureMessageAsync(pictureMessage);
+        }
+
+        public async Task SendLocationMessageAsync(int botId, string receiverId, OutMessage message)
+        {
+            //
+            if(message.Location == null) throw new ArgumentNullException("location");
+
+            // Obsolete
+            var viberBotClient = await viberBotFactory.GetClient(botId);
+
+            // 
+            var locationMessage = new LocationMessage
+            {
+                Receiver = receiverId,
+                MinApiVersion = 4,
+                Location = new Viber.Bot.Models.Location
                 {
-                    Columns = 6,
-                    Rows = 1,
-                    Text = "OK",
-                    ActionType = KeyboardActionType.Reply,
-                    ActionBody = "OK"
+                    Lat = message.Location.Latitude,
+                    Lon = message.Location.Lontitude
                 }
             };
 
-            // Send keyboard message
-            await SendKeyboardMessage(botid, receiverId, messageText, buttons);
+            await viberBotClient.SendLocationMessageAsync(locationMessage);
         }
 
-        public async Task SendStartedMenuAsync(int botId, string receiverId, Message message)
+        /// <inheritdoc />
+        public async Task SendRichMediaMessageAsync(int botId, string receiverId, OutMessage message)
         {
+            // Obsolete
             var viberBotClient = await viberBotFactory.GetClient(botId);
 
-            var buttons = message.Buttons.Select(button => new KeyboardButton
-            {
-                Text = button.Title,
-                ActionBody = button.Id.ToString(),
-                Columns = button.Columns,
-                Rows = button.Rows,
-                BackgroundColor = button.Style?.BackgroundColor,
-                TextHorizontalAlign = (TextHorizontalAlign)button.Style?.TextHorizontalAlign,
-                TextVerticalAlign = (TextVerticalAlign)button.Style?.TextVerticalAlign,
-                TextSize = (TextSize)button.Style?.TextSize
+            // 
+            var buttons = message.Buttons.Select(button => {
+                var keyboardButton = new KeyboardButton
+                {
+                    Text = button.Title,
+                    ActionBody = button.Id.ToString(),
+                    Columns = button.Columns,
+                    Rows = button.Rows
+                };
+
+                if(button.Style != null)
+                {
+                    keyboardButton.BackgroundColor = button.Style.BackgroundColor;
+                    keyboardButton.TextHorizontalAlign = button.Style.TextHorizontalAlign.ToTextHorizontalAlign();
+                    keyboardButton.TextVerticalAlign = button.Style.TextVerticalAlign.ToTextVerticalAlign();
+                    keyboardButton.TextSize = button.Style.TextSize.ToTextSize();
+                }
+
+                return keyboardButton;
             });
 
+            // 
             var carouselMessage = new CarouselMessage
             {
                 Receiver = receiverId,
@@ -69,6 +144,8 @@ namespace ViberBot.Services
                 CarouselContent = new Carousel
                 {
                     AlternateText = message.Text,
+                    ButtonsGroupColumns = 6,
+                    ButtonsGroupRows = 6,
                     Buttons = buttons.ToList()
                 }
             };
@@ -76,46 +153,88 @@ namespace ViberBot.Services
             await viberBotClient.SendCarouselMessageAsync(carouselMessage);
         }
 
-        public async Task SendContainerAreasMenuAsync(string receiverId)
+        public async Task SendKeyboardMessageAsync(int botId, string receiverId, OutMessage message)
         {
-        }
-
-        public async Task SendFixationMenuAsync(string receiverId)
-        {
-        }
-
-        public async Task SendMessageAsync(string receiverId, string messageText)
-        {
-        }
-
-        private async Task SendKeyboardMessage(int botId, string receiverId, string messageText, ICollection<KeyboardButton> buttons)
-        {
+            // Obsolete
             var viberBotClient = await viberBotFactory.GetClient(botId);
 
-            // Keyboard message
+            // 
+            var buttons = message.Buttons.Select(button => {
+                var keyboardButton = new KeyboardButton
+                {
+                    Text = button.Title,
+                    ActionBody = button.Id.ToString(),
+                    Columns = button.Columns,
+                    Rows = button.Rows
+                };
+
+                if(button.Style != null)
+                {
+                    keyboardButton.BackgroundColor = button.Style.BackgroundColor;
+                    keyboardButton.TextHorizontalAlign = button.Style.TextHorizontalAlign.ToTextHorizontalAlign();
+                    keyboardButton.TextVerticalAlign = button.Style.TextVerticalAlign.ToTextVerticalAlign();
+                    keyboardButton.TextSize = button.Style.TextSize.ToTextSize();
+                }
+
+                return keyboardButton;
+            });
+
+            // 
             var keyboardMessage = new KeyboardMessage
             {
                 Receiver = receiverId,
-                Text = messageText,
+                MinApiVersion = 4,
+                Text = message.Text,
                 Keyboard = new Keyboard
                 {
-                    Buttons = buttons,
-                    InputFieldState = KeyboardInputFieldState.Hidden,
-                    DefaultHeight = false
+                    Buttons = buttons.ToList()
                 }
             };
 
-            // Process keyboard message send
             await viberBotClient.SendKeyboardMessageAsync(keyboardMessage);
         }
     }
 
     public interface ISendMessageService
     {
-        Task SendSubscribeMenuAsync(int botId, string receiverId);
-        Task SendStartedMenuAsync(int botId, string receiverId, Message message);
-        Task SendContainerAreasMenuAsync(string receiverId);
-        Task SendFixationMenuAsync(string receiverId);
-        Task SendMessageAsync(string receiverId, string messageText);
+        /// <summary>
+        /// Sends text message to user
+        /// </summary>
+        /// <param name="botId">Bot identifier</param>
+        /// <param name="receiverId">Receiver identifier</param>
+        /// <param name="message">Unified message</param>
+        Task SendTextMessageAsync(int botId, string receiverId, OutMessage message);
+        
+        /// <summary>
+        /// Sends picture message to user
+        /// </summary>
+        /// <param name="botId">Bot identifier</param>
+        /// <param name="receiverId">Receiver identifier</param>
+        /// <param name="message">Unified message</param>
+        Task SendPictureMessageAsync(int botId, string receiverId, OutMessage message);
+        
+        /// <summary>
+        /// Sends location message to user
+        /// </summary>
+        /// <param name="botId">Bot identifier</param>
+        /// <param name="receiverId">Receiver identifier</param>
+        /// <param name="message">Unified message</param>
+        Task SendLocationMessageAsync(int botId, string receiverId, OutMessage message);
+        
+        /// <summary>
+        /// Sends rich media message to user
+        /// </summary>
+        /// <param name="botId">Bot identifier</param>
+        /// <param name="receiverId">Receiver identifier</param>
+        /// <param name="message">Unified message</param>
+        Task SendRichMediaMessageAsync(int botId, string receiverId, OutMessage message);
+        
+        /// <summary>
+        /// Sends keyboard message to user
+        /// </summary>
+        /// <param name="botId">Bot identifier</param>
+        /// <param name="receiverId">Receiver identifier</param>
+        /// <param name="message">Unified message</param>
+        Task SendKeyboardMessageAsync(int botId, string receiverId, OutMessage message);
     }
 }

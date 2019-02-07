@@ -36,7 +36,10 @@
   <medialist>
     <media>url - video, формат?</media>
   </medialist>
-  <buttonmsgtoken>id сообщения, с нажатой кнопкой или пустой, для window-кнопок</buttonmsgtoken>
-  <buttonid>Id нажатой кнопки</buttonid>
-  <location>???? формат ???</location>
+  <buttonmsgtoken>000000000000</buttonmsgtoken>
+  <buttonid>0</buttonid>
+  <location>
+    <lat>0.0</lat>
+    <lon>0.0</lon>
+  </location>
 </msg>

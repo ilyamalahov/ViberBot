@@ -52,9 +52,6 @@ namespace ViberBot
 
             // 
             services.AddTransient<IBotService, ViberBotService>();
-
-            // 
-            services.AddTransient<IMessageService, MessageService>();
             
             // 
             services.AddTransient<ISendMessageService, SendMessageService>();
@@ -70,7 +67,7 @@ namespace ViberBot
             services.AddSingleton<IStateMachineService, InMemoryStateMachineService>();
 
             // 
-            services.AddMvcCore();
+            services.AddMvcCore().AddXmlDataContractSerializerFormatters();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -84,6 +81,8 @@ namespace ViberBot
             {
                 // app.UseHsts();
             }
+
+            // app.UseHttpsRedirection();
 
             // 
             app.UseStaticFiles();
