@@ -1,1 +1,0 @@
-Server=.\\SQLEXPRESS;Initial Catalog=reg_tko;Trusted_Connection=True;Integrated Security=True;

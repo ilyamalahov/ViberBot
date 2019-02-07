@@ -260,7 +260,8 @@ paket-files/
 __pycache__/
 *.pyc
 
-# Assets folder
-assets
+# Images folder
+wwwroot/images
 
+# Application development JSON settings
 appsettings.Development.json
