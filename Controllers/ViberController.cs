@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -21,7 +23,7 @@ namespace ViberBot.Controllers
     [Route("api/[controller]")]
     public class ViberController : ControllerBase
     {
-        private readonly IViberBotClient viberBotClient;
+        private readonly IBotFactory<IViberBotClient> viberBotFactory;
         private readonly IBotService botService;
         private readonly ILogger<ViberController> logger;
 
@@ -30,19 +32,17 @@ namespace ViberBot.Controllers
             IBotService botService,
             ILogger<ViberController> logger)
         {
-            var botId = 1;
-
-            this.viberBotClient = viberBotFactory.GetClient(botId);
+            this.viberBotFactory = viberBotFactory;
             this.botService = botService;
             this.logger = logger;
         }
 
         [HttpPost("{botId:int}")]
-        public async Task Index(int botId)
+        public async Task<IActionResult> Index(int botId)
         {
             try
             {
-                // var viberBotClient = await viberBotFactory.GetClient(botId);
+                var viberBotClient = viberBotFactory.GetClient(botId);
 
                 var body = await new StreamReader(Request.Body).ReadToEndAsync();
 
@@ -73,13 +73,17 @@ namespace ViberBot.Controllers
                         await botService.UnSubscribed(botId, callbackData.UserId);
                         break;
                     case EventType.Message:
-                        await botService.ReceiveMessage(botId, callbackData.Sender.Id, callbackData.Message);
+                        await botService.ReceiveMessage(botId, callbackData.Sender.Id, callbackData.MessageToken, callbackData.Message);
                         break;
                 }
+
+                return Ok();
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error: {ex.Message}", ex.Message);
+                
+                return BadRequest(ex.Message);
             }
         }
     }

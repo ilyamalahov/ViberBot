@@ -38,9 +38,6 @@ namespace ViberBot
                 options.WebApiEndpoint = viberBotOptions.WebApiEndpoint;
             });
 
-            //
-            // services.AddSingleton<IViberBotClient>(provider => new ViberBotClient(viberBotOptions.AuthenticationToken));
-            
             // 
             services.AddSingleton<IBotFactory<IViberBotClient>, ViberBotFactory>();
 
@@ -64,7 +61,7 @@ namespace ViberBot
 
             // WebApiService
             //
-            services.AddSingleton<IStateMachineService, InMemoryStateMachineService>();
+            services.AddSingleton<IStateMachineService, StateMachineService>();
 
             // 
             services.AddMvcCore().AddXmlDataContractSerializerFormatters();

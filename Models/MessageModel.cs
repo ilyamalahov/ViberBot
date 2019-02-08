@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 namespace ViberBot.Models
 {
     [DataContract(Name = "model", Namespace = "")]
-    public class MessageModel<T> where T : class
+    public class MessageModel<T>
     {
         [DataMember(Name = "botId", Order = 1)]
         public int BotId { get; set; }

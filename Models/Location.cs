@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 
 namespace ViberBot.Models
 {
-    [DataContract(Namespace = "")]
+    [DataContract(Name = "location", Namespace = "")]
     public class Location
     {
         [DataMember(Name = "lon", Order = 1)]

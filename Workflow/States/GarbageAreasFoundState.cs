@@ -6,16 +6,13 @@ namespace ViberBot.Workflow.States
 {
     public class GarbageAreasFoundState : State
     {
-        private readonly IViberApiHttpService viberApiHttpService;
-
-        public GarbageAreasFoundState(IViberApiHttpService viberApiHttpService)
+        public GarbageAreasFoundState()
         {
-            this.viberApiHttpService = viberApiHttpService;
         }
 
         public override async Task Start(int botId, Guid agentId) 
         { 
-            context.SetState(new StartedState(viberApiHttpService));
+            context.SetState(new SubscribedState());
 
             await context.Start(botId, agentId);
         }

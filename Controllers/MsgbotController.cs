@@ -33,33 +33,33 @@ namespace ViberBot.Controllers
             this.sendMessageService = sendMessageService;
         }
 
-        [HttpPost("change_state")]
-        public IActionResult ChangeState(int botId, Guid agentId, string service, int newStateId)
-        {
-            // var serviceState = (ServiceState)newStateId;
+        // [HttpPost("change_state")]
+        // public IActionResult ChangeState(int botId, Guid agentId, string service, int newStateId)
+        // {
+        //     // var serviceState = (ServiceState)newStateId;
 
-            // if(serviceState == ServiceState.Subscribed)
-            // {
-            //     var stateContext = stateMachineService.Get(agentId);
+        //     // if(serviceState == ServiceState.Subscribed)
+        //     // {
+        //     //     var stateContext = stateMachineService.Get(agentId);
                 
-            //     await stateContext.Start(botId, agentId);
-            // }
+        //     //     await stateContext.Start(botId, agentId);
+        //     // }
 
-            return Ok();
-        }
+        //     return Ok();
+        // }
         
-        [HttpPost("in")]
-        public IActionResult In([FromBody] MessageModel<InMessage> model)
-        {
-            if (!ModelState.IsValid)
-            { 
-                return BadRequest(ModelState);
-            }
+        // [HttpPost("in")]
+        // public IActionResult In([FromBody] MessageModel<InMessage> model)
+        // {
+        //     if (!ModelState.IsValid)
+        //     { 
+        //         return BadRequest(ModelState);
+        //     }
 
-            var messageType = model.Message.DetermineMessageType();
+        //     var messageType = model.Message.DetermineMessageType();
 
-            return Ok(messageType);
-        }
+        //     return Ok(messageType);
+        // }
 
         [HttpPost("out")]
         public async Task<IActionResult> Out([FromBody] MessageModel<OutMessage> model)

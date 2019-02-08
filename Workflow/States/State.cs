@@ -22,7 +22,7 @@ namespace ViberBot.Workflow.States
         /// </summary>
         /// <param name="agentId"></param>
         /// <returns></returns>
-        public virtual Task Start(int botId, Guid agentId) { return Task.CompletedTask; }
+        public virtual Task Start(int botId, Guid agentId) => RouteError();
         
         /// <summary>
         /// 
@@ -30,19 +30,19 @@ namespace ViberBot.Workflow.States
         /// <param name="altitude"></param>
         /// <param name="latitude"></param>
         /// <returns></returns>
-        public virtual Task SearchGarbageAreas(double altitude, double latitude) { return Task.CompletedTask; }
+        public virtual Task SearchGarbageAreas(double altitude, double latitude) => RouteError();
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="garbageAreaName"></param>
         /// <returns></returns>
-        public virtual Task SelectGarbageArea(string garbageAreaName) { return Task.CompletedTask; }
+        public virtual Task SelectGarbageArea(string garbageAreaName) => RouteError();
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
-        public virtual Task WaitMediaFile() { return Task.CompletedTask; }
+        public virtual Task WaitMediaFile() => RouteError();
     }
 }

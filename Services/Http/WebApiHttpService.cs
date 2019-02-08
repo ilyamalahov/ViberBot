@@ -40,6 +40,9 @@ namespace ViberBot.Services.Http
                 case "application/xml":
                     formatter = new XmlMediaTypeFormatter();
                     break;
+                case "application/json":
+                    formatter = new JsonMediaTypeFormatter();
+                    break;
             }
 
             return await httpClient.PostAsync(url, parametersObj, formatter);

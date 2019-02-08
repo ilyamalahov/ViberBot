@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 
 namespace ViberBot.Models
 {
-    [DataContract(Namespace="")]
+    [DataContract(Name = "msg", Namespace="")]
     public class OutMessage
     {        
         [DataMember(Name = "text", Order = 1)]

@@ -1,29 +1,54 @@
 using System;
+using System.IO;
+using System.Net.Http;
+using System.Net.Http.Formatting;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using System.Xml;
+using ViberBot.Models;
+using ViberBot.Repositories;
 using ViberBot.Services.Http;
 
 namespace ViberBot.Workflow.States
 {
-    public class StartedState : State
+    public class SubscribedState : State
     {
-        private readonly IViberApiHttpService viberApiHttpService;
+        private readonly BotRepository botRepository;
 
-        public StartedState(IViberApiHttpService viberApiHttpService)
+        public SubscribedState()
         {
-            this.viberApiHttpService = viberApiHttpService;
+            botRepository = new BotRepository("");  
         }
 
         public override async Task Start(int botId, Guid agentId)
-        {
-            var parameters = new
+        {    
+            var bot = await botRepository.GetById(botId);
+
+            OutMessage outMessage = null;
+
+            var serializer = new DataContractSerializer(typeof(OutMessage));
+
+            using (var reader = XmlReader.Create(bot.InvitationMessage))
             {
-                botId,
-                agentId
+                outMessage = (OutMessage)serializer.ReadObject(reader);   
+            }
+
+            // 
+            var model = new MessageModel<OutMessage>
+            {
+                BotId = botId,
+                AgentId = agentId,
+                Message = outMessage
             };
 
-            await viberApiHttpService.SendGetAsync("start", parameters);
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.BaseAddress = new Uri("https://localhost:5001/api/");
 
-            context.SetState(new DriverState(viberApiHttpService));
+                await httpClient.PostAsync("msgbot/out", model, new XmlMediaTypeFormatter());
+            }
+
+            context.SetState(new StartedState());
         }
     }
 }

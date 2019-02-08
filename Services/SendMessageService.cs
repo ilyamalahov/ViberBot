@@ -165,7 +165,8 @@ namespace ViberBot.Services
                 var keyboardButton = new KeyboardButton
                 {
                     Text = button.Title,
-                    ActionBody = button.Id.ToString(),
+                    // ActionBody = "Helllo",
+                    ActionType = KeyboardActionType.LocationPicker,
                     Columns = button.Columns,
                     Rows = button.Rows
                 };
