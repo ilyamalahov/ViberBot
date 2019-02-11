@@ -34,7 +34,7 @@ namespace ViberBot.Services.StateMachine
 
             lock (stateContexts)
             {
-                var stateContext = container.Resolve<IContext>(new TypedParameter(typeof(State), new SubscribedState()));
+                var stateContext = container.Resolve<IContext>();
 
                 return stateContexts.TryAdd(userId, stateContext);
             }

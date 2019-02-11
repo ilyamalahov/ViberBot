@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Autofac;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using ViberBot.Workflow.States;
@@ -14,27 +15,43 @@ namespace ViberBot.Workflow
         Task SelectGarbageArea(string garbageAreaName);
         Task WaitMediaFile();
 
-        void SetState(State state);
+        void SetState<T>() where T : State;
     }
+
+    public interface IStateFactory
+    {
+        State GetState<T>() where T : State;
+    }
+
+    public class StateFactory : IStateFactory
+    {
+        private IContainer container;
+
+        public StateFactory(IContainer container)
+        {
+            this.container = container;
+        }
+
+        public State GetState<T>() where T : State
+        {
+            return container.Resolve<T>();
+        }
+    }
+
     public class Context : IContext
     {
         private State currentState;
+        private readonly IStateFactory stateFactory;
 
-        // private IDictionary<Command, Func<string, Task>> triggers;
-        public Context(State initialState)
+        public Context(IStateFactory stateFactory)
         {
-            // triggers = new Dictionary<Command, Func<string, Task>>()
-            // {
-            //     { Command.Start, async (string receiverId) => await currentState.Start(receiverId) },
-            //     { Command.SearchContainerPlacesNerby, async (receiverId) => await currentState.SearchContainerPlacesNerby() }
-            // };
-
-            SetState(initialState);
+            this.stateFactory = stateFactory;
         }
 
-        public void SetState(State state)
+        public void SetState<T>() where T : State
         {
-            currentState = state;
+            currentState = stateFactory.GetState<T>();
+
             currentState.SetContext(this);
         }
 
@@ -49,14 +66,5 @@ namespace ViberBot.Workflow
 
         /// <inheritdoc/>
         public async Task WaitMediaFile() => await currentState.WaitMediaFile();
-    }
-
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum Command
-    {
-        Start,
-        SearchGarbageAreas,
-        SelectGarbageArea,
-        WaitMediaFile
     }
 }
