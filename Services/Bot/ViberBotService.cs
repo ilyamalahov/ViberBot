@@ -130,7 +130,7 @@ namespace ViberBot.Services.Bot
             var people = await peopleRepository.GetPeopleByViberIdAsync(senderId);
 
             // 
-            var model = new MessageModel<InMessage>
+            var model = new PayloadModel<InMessage>
             {
                 BotId = botId,
                 AgentId = people.Id,
@@ -207,7 +207,7 @@ namespace ViberBot.Services.Bot
         /// <returns>Http response</returns>
         private async Task SendChangedState(int botId, Guid agentId, ServiceState state)
         {
-            var model = new MessageModel<ServiceState>
+            var model = new PayloadModel<ServiceState>
             {
                 BotId = botId,
                 AgentId = agentId,

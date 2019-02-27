@@ -32,7 +32,7 @@ namespace ViberBot.Controllers
         }
 
         [HttpPost("change_state")]
-        public async Task<IActionResult> ChangeState([FromBody] MessageModel<ServiceState> model)
+        public async Task<IActionResult> ChangeState([FromBody] PayloadModel<ServiceState> model)
         {
             if (!ModelState.IsValid)
             {
@@ -50,7 +50,7 @@ namespace ViberBot.Controllers
         }
 
         [HttpPost("in")]
-        public IActionResult In([FromBody] MessageModel<InMessage> model)
+        public IActionResult In([FromBody] PayloadModel<InMessage> model)
         {
             if (!ModelState.IsValid)
             {

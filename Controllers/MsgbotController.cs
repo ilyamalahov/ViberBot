@@ -62,7 +62,7 @@ namespace ViberBot.Controllers
         // }
 
         [HttpPost("out")]
-        public async Task<IActionResult> Out([FromBody] MessageModel<OutMessage> model)
+        public async Task<IActionResult> Out([FromBody] PayloadModel<OutMessage> model)
         {
             if (!ModelState.IsValid)
             { 

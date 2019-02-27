@@ -47,7 +47,7 @@ namespace ViberBot.Services.StateMachine
                 throw new ArgumentNullException("userId");
             }
 
-            if (stateContexts.ContainsKey(userId))
+            if (!stateContexts.ContainsKey(userId))
             {
                 throw new Exception($"State context for user {userId} not exists");
             }
@@ -60,19 +60,22 @@ namespace ViberBot.Services.StateMachine
 
         public IContext Get(Guid userId)
         {
-            if (userId == null) throw new ArgumentNullException("userId");
+            if (userId == null)
+            {
+                throw new ArgumentNullException("userId");
+            }
 
             if (!stateContexts.ContainsKey(userId) && !Add(userId))
             {
-                return null;
+                throw new Exception($"Insert state machine for user \"{userId}\" failed");
             }
 
-            if (!stateContexts.TryGetValue(userId, out var stateMachine))
+            if (!stateContexts.TryGetValue(userId, out var stateContext))
             {
                 throw new Exception($"State machine for user \"{userId}\" not exists");
             }
 
-            return stateMachine;
+            return stateContext;
         }
     }
 }

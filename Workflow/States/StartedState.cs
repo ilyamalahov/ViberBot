@@ -34,7 +34,7 @@ namespace ViberBot.Workflow.States
             }
 
             // 
-            var model = new MessageModel<OutMessage>
+            var model = new PayloadModel<OutMessage>
             {
                 BotId = botId,
                 AgentId = agentId,
