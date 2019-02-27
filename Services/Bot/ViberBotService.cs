@@ -1,38 +1,30 @@
 using System;
-using System.IO;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Viber.Bot;
-using Viber.Bot.Enums;
 using Viber.Bot.Messages;
-using Viber.Bot.Models;
+using ViberBot.Factories;
 using ViberBot.Models;
 using ViberBot.Repositories;
-using ViberBot.Services.Http;
+using ViberBot.Extensions;
 
 namespace ViberBot.Services.Bot
 {
     public class ViberBotService : IBotService
     {
         private readonly ISendMessageService sendMessageService;
-        private readonly IWebApiHttpService webApiHttpService;
+        private readonly IHttpClientFactory httpClientFactory;
         private readonly IPeopleRepository peopleRepository;
         private readonly ILogger<ViberBotService> logger;
 
         public ViberBotService(
             ISendMessageService sendMessageService,
-            IWebApiHttpService webApiHttpService,
+            IHttpClientFactory httpClientFactory,
             IPeopleRepository peopleRepository,
             ILogger<ViberBotService> logger
             )
         {
             this.sendMessageService = sendMessageService;
-            this.webApiHttpService = webApiHttpService;
+            this.httpClientFactory = httpClientFactory;
             this.peopleRepository = peopleRepository;
             this.logger = logger;
         }
@@ -137,12 +129,7 @@ namespace ViberBot.Services.Bot
                 Message = inMessage
             };
 
-            using (var httpClient = new HttpClient())
-            {
-                httpClient.BaseAddress = new Uri("https://localhost:5001/api/");
-
-                await httpClient.PostAsync("bot/change_state", model, new XmlMediaTypeFormatter());
-            }
+            var response = httpClientFactory.Get("https://localhost:5001/api/").SendPostAsync<MessageModel<InMessage>, string>("msgbot/change_state", model, "application/xml");
         }
 
         /// <summary>
@@ -222,12 +209,12 @@ namespace ViberBot.Services.Bot
             //     state
             // };
 
-            using (var httpClient = new HttpClient())
-            {
-                httpClient.BaseAddress = new Uri("https://localhost:5001/api/");
+            // using (var httpClient = new HttpClient())
+            // {
+            //     httpClient.BaseAddress = new Uri("https://localhost:5001/api/");
 
-                await httpClient.PostAsync("bot/change_state", model, new XmlMediaTypeFormatter());
-            }
+            //     await httpClient.PostAsync("bot/change_state", model, new XmlMediaTypeFormatter());
+            // }
         }
     }
 

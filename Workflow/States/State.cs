@@ -14,7 +14,7 @@ namespace ViberBot.Workflow.States
 
         protected Task RouteError()
         {
-            return Task.CompletedTask;
+            return Task.FromException<string>(new Exception("You can't move to next state from current state"));
         }
         
         /// <summary>

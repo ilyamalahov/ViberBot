@@ -9,23 +9,23 @@ namespace ViberBot.Factories
 {
     public class HttpClientFactory : IHttpClientFactory
     {
-        private Dictionary<string, HttpClient> httpClients;
+        private readonly Dictionary<string, HttpClient> httpClients;
 
         public HttpClientFactory(IBotRepository botRepository)
         {
             httpClients = new Dictionary<string, HttpClient>();
         }
 
-        public HttpClient GetClient(string url)
+        public HttpClient Get(string url)
         {
             if(url == null)
             {
                 throw new ArgumentNullException("url");
             }
 
-            if(!httpClients.ContainsKey(url))
+            if(!httpClients.ContainsKey(url) && !AddClient(url))
             {
-
+                return null;
             }
 
             if(!httpClients.TryGetValue(url, out var client))
@@ -57,6 +57,6 @@ namespace ViberBot.Factories
 
     public interface IHttpClientFactory
     {
-        HttpClient GetClient(string url);
+        HttpClient Get(string url);
     }
 }

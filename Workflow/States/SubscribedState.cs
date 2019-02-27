@@ -1,13 +1,23 @@
 using System;
+using System.IO;
+using System.Net.Http;
+using System.Net.Http.Formatting;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using System.Xml;
+using ViberBot.Models;
+using ViberBot.Repositories;
 using ViberBot.Services.Http;
 
 namespace ViberBot.Workflow.States
 {
-    public class StartedState : State
+    public class SubscribedState : State
     {
-        public StartedState()
+        private readonly IBotRepository botRepository;
+
+        public SubscribedState(IBotRepository botRepository)
         {
+            this.botRepository = botRepository;  
         }
 
         public override async Task Start(int botId, Guid agentId)
@@ -24,7 +34,7 @@ namespace ViberBot.Workflow.States
             }
 
             // 
-            var model = new PayloadModel<OutMessage>
+            var model = new MessageModel<OutMessage>
             {
                 BotId = botId,
                 AgentId = agentId,
@@ -34,14 +44,11 @@ namespace ViberBot.Workflow.States
             using (var httpClient = new HttpClient())
             {
                 httpClient.BaseAddress = new Uri("https://localhost:5001/api/");
-        {
-            context.SetState<SubscribedState>();
 
-            await context.Start(botId, agentId);
-        }
+                await httpClient.PostAsync("msgbot/out", model, new XmlMediaTypeFormatter());
+            }
 
-        public override async Task SearchGarbageAreas(double altitude, double latitude)
-        {
+            context.SetState<StartedState>();
         }
     }
 }

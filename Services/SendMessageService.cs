@@ -26,37 +26,12 @@ namespace ViberBot.Services
             var botId = 1;
 
             this.viberBotClient = viberBotFactory.GetClient(botId);
-            // this.viberBotFactory = viberBotFactory;
         }
-
-        // public async Task SendSubscribeMenuAsync(int botid, string receiverId)
-        // {
-        //     var messageText = "Нажмите кнопку \"OK\", чтобы продолжить";
-
-        //     // Keyboard buttons
-        //     var buttons = new[]
-        //     {
-        //         new KeyboardButton
-        //         {
-        //             Columns = 6,
-        //             Rows = 1,
-        //             Text = "OK",
-        //             ActionType = KeyboardActionType.Reply,
-        //             ActionBody = "OK"
-        //         }
-        //     };
-
-        //     // Send keyboard message
-        //     await SendKeyboardMessage(botid, receiverId, messageText, buttons);
-        // }
 
         public async Task SendTextMessageAsync(int botId, string receiverId, OutMessage message)
         {
             //
             if(message.Text == null) throw new ArgumentNullException("text");
-
-            // Obsolete
-            // var viberBotClient = viberBotFactory.GetClient(botId);
 
             // 
             var textMessage = new TextMessage
@@ -74,9 +49,6 @@ namespace ViberBot.Services
             //
             if(message.Picture == null) throw new ArgumentNullException("picture");
 
-            // Obsolete
-            // var viberBotClient = await viberBotFactory.GetClient(botId);
-
             // 
             var pictureMessage = new PictureMessage
             {
@@ -92,9 +64,6 @@ namespace ViberBot.Services
         {
             //
             if(message.Location == null) throw new ArgumentNullException("location");
-
-            // Obsolete
-            // var viberBotClient = await viberBotFactory.GetClient(botId);
 
             // 
             var locationMessage = new LocationMessage
@@ -114,9 +83,6 @@ namespace ViberBot.Services
         /// <inheritdoc />
         public async Task SendRichMediaMessageAsync(int botId, string receiverId, OutMessage message)
         {
-            // Obsolete
-            // var viberBotClient = await viberBotFactory.GetClient(botId);
-
             // 
             var buttons = message.Buttons.Select(button => {
                 var keyboardButton = new KeyboardButton
@@ -157,9 +123,6 @@ namespace ViberBot.Services
 
         public async Task SendKeyboardMessageAsync(int botId, string receiverId, OutMessage message)
         {
-            // Obsolete
-            // var viberBotClient = await viberBotFactory.GetClient(botId);
-
             // 
             var buttons = message.Buttons.Select(button => {
                 var keyboardButton = new KeyboardButton
@@ -196,48 +159,5 @@ namespace ViberBot.Services
 
             await viberBotClient.SendKeyboardMessageAsync(keyboardMessage);
         }
-    }
-
-    public interface ISendMessageService
-    {
-        /// <summary>
-        /// Sends text message to user
-        /// </summary>
-        /// <param name="botId">Bot identifier</param>
-        /// <param name="receiverId">Receiver identifier</param>
-        /// <param name="message">Unified message</param>
-        Task SendTextMessageAsync(int botId, string receiverId, OutMessage message);
-        
-        /// <summary>
-        /// Sends picture message to user
-        /// </summary>
-        /// <param name="botId">Bot identifier</param>
-        /// <param name="receiverId">Receiver identifier</param>
-        /// <param name="message">Unified message</param>
-        Task SendPictureMessageAsync(int botId, string receiverId, OutMessage message);
-        
-        /// <summary>
-        /// Sends location message to user
-        /// </summary>
-        /// <param name="botId">Bot identifier</param>
-        /// <param name="receiverId">Receiver identifier</param>
-        /// <param name="message">Unified message</param>
-        Task SendLocationMessageAsync(int botId, string receiverId, OutMessage message);
-        
-        /// <summary>
-        /// Sends rich media message to user
-        /// </summary>
-        /// <param name="botId">Bot identifier</param>
-        /// <param name="receiverId">Receiver identifier</param>
-        /// <param name="message">Unified message</param>
-        Task SendRichMediaMessageAsync(int botId, string receiverId, OutMessage message);
-        
-        /// <summary>
-        /// Sends keyboard message to user
-        /// </summary>
-        /// <param name="botId">Bot identifier</param>
-        /// <param name="receiverId">Receiver identifier</param>
-        /// <param name="message">Unified message</param>
-        Task SendKeyboardMessageAsync(int botId, string receiverId, OutMessage message);
     }
 }
